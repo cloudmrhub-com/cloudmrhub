@@ -16,7 +16,7 @@ classdef cm2DSignalToNoiseRatioMultipleReplicas<cm2DSignalToNoiseRatio
         function this = cm2DSignalToNoiseRatioMultipleReplicas(x)
             %the class expects a 3D matrix composed by a tile of 2D images
             %or nothing
-            this.Type='MR';
+            this.Type='MR'; 
            
             if nargin>0
              this.add2DStackOfImages(x)                

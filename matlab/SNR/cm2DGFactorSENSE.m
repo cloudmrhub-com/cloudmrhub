@@ -29,38 +29,30 @@ classdef cm2DGFactorSENSE<cm2DReconSENSE
         
             %Riccardo Lattanzi riccardo.lattanzi@nyulangone.org
             %SENSE_img_recon December 2020
-            
-              [SS]=this.getSignalSize();
+            [SS]=this.getSignalSize();
              nf=SS(1);
              np=SS(2);
              nc = this.getSignalNCoils();
-             R1=this.getAccelerationFrequency();
-             R2=this.getAccelerationPhase();
-            ACL=this.getAutocalibration();
+             
           pw_signalrawdata=this.getPrewhitenedSignal();
-%         k_temp              = zeros(size(pw_signalrawdata));
-%         k_temp(1:R1:nf,1:R2:np,:)  = pw_signalrawdata(1:R1:nf,1:R2:np,:);
-            k_temp=undersamplemSense2D(pw_signalrawdata,R1,R2,ACL);
-            img_matrix=this.get2DKSIFFT(k_temp);
-            pw_sensmap=this.getCoilSensitivityMatrixPrewhitened();
+            pw_sensmap=this.getCoilSensitivityMatrix();
 
             invRn=this.getInverseNoiseCovariancePrewhithened();
-             
+             R1=this.getAccelerationFrequency();
+             R2=this.getAccelerationPhase();
+            
+             Rn = eye(nc); %it's prewhitened
 
             Rtot = R1*R2;
             
-            
-            % Since only nf*np/Rtot samples are actually sampled, we need to scale the image by the square root of the
-            % total acceleration factor to maintain the same scaling as for the noise (fully sampled)
-            img_matrix = img_matrix*sqrt(Rtot);
+             k_temp=this.getUndersampledKSpaceZeroPadded(pw_signalrawdata,R1,R2);
+            aliased_image = this.get2DKSIFFT(k_temp)*sqrt(Rtot);
             
             
+          imfold = this.shrinktoaliasedmatrix_2d(aliased_image,R1,R2);
             
-            imfold=   this.shrinktoaliasedmatrix_2d(img_matrix,R1,R2);
+            G=zeros(nf,np);
             
-            
-            
-            G = zeros(nf,np);
             
             for irow=1:floor(nf/R1)
                 for icol=1:floor(np/R2)
@@ -75,9 +67,11 @@ classdef cm2DGFactorSENSE<cm2DReconSENSE
             G(irow:floor(nf/R1):nf,icol:floor(np/R2):np) = reshape(sqrt(abs(diag(pinv(s'*invRn*s)).*diag(s'*invRn*s))),[current_R1 current_R2]);
                 end
             end
+            
+                G=this.demimicAccelerated2DImage(G);
+
         end
         
-    G=this.demimicAccelerated2DImage(this,G);
         
     end
  

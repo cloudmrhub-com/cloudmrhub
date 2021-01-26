@@ -14,6 +14,7 @@ classdef cm2DRawDataReader<cmOutput
         RawDataRefsKSpace
         AverageRawDataImageKSpaceFlag=1
         AverageRawDataNoiseKSpaceFlag=0;
+        SignalFile=1 %the file containes noise in the data?
     end
     
     methods
@@ -27,19 +28,39 @@ classdef cm2DRawDataReader<cmOutput
         end
         function setFilename(this,f)
             this.FileName=f;
+            this.readFile();    
         end
         
         function readFile(this)
+            try
             [pt,n,e]=fileparts(this.getFilename);
+            
             switch lower(e)
+                
                 case '.h5'
                     this.Reader=CLOUDMRIsmrmRawDataReader(this.getFilename());
                 case '.dat'
+                    if (this.getIsSignalFile())
                     this.Reader=cm2DSiemensRawDataReader(this.getFilename());
+                    else
+                        this.Reader=cm2DSiemensRawDataReaderNoise(this.getFilename());
+                    end
+                    
+                end
             end
             
         end
+    
         
+            function setIsSignalFile(this,f)
+            this.SignalFile=f;
+            readFile(this)
+            end
+        
+            function o=getIsSignalFile(this)
+            o=this.SignalFile;
+            end
+            
         function setRawDataImageKSpace(this,f)
             this.RawDataImageKSpace=f;
         end
@@ -70,7 +91,7 @@ classdef cm2DRawDataReader<cmOutput
         
         
         function o=getRawDataImageKSpace(this)
-            
+            try
             if isempty(this.RawDataImageKSpace)
                             if (isempty(this.Reader))
                                 this.readFile();
@@ -80,7 +101,9 @@ classdef cm2DRawDataReader<cmOutput
             
             
             o=this.RawDataImageKSpace;
-                   
+            catch
+                o=[]
+            end
             
             
         end
@@ -89,15 +112,17 @@ classdef cm2DRawDataReader<cmOutput
         
         function o=setcm2DRawDataReaderImageKSpaceFrom2DSlice(this,K,av,c,r)
             %it must be 4D freq,phase slice and coils
+            
+            NK=this.getRawDataImageKSpace();
             [NF NP SL NC]=size(K);
            % nAvg,nContrasts,nReps,enc_Nx, enc_Ny, nSlices, nCoils
-            NK=zeros(1,1,1,NF,NP,SL,NC);
+            %NK=zeros(1,1,1,NF,NP,SL,NC);
             for s=1:SL
-            NK(av,c,r,:,:,s,:)=K;
+            NK(av,c,r,:,:,s,:)=K(:,:,s,:);
             end
-            if isempty(this.RawDataImageKSpace)
+            
             this.setRawDataImageKSpace(NK);
-            end
+            
         end
         
         
@@ -142,11 +167,24 @@ classdef cm2DRawDataReader<cmOutput
         
         
         
+                function o=getRawDataImageKSpaceFPSCR(this,a,c)
+                    REP=this.getNumberRepetition();
+                    SL=this.getNumberImageSlices();
+                    C=this.getNumberCoils();
+                    F=this.getImageDimensions();
+                    o=zeros([F C REP]);
+                    for s=1:SL
+                        for r=1:REP
+                            o(:,:,s,:,r)=this.getRawDataImageKSpaceSlice(a,c,r,s);
+                        end
+                    end
+                    
+                end
+
         
         
         
-        
-        function o=getRawDataRawDataImageKSpaceSlice(this,a,c,r,s)
+        function o=getRawDataImageKSpaceSlice(this,a,c,r,s)
             %this function get me the slice of the signal
             %average,contrast,repetition,slice)
             if ( this.getAverageRawDataImageKSpaceFlag())
@@ -155,10 +193,6 @@ classdef cm2DRawDataReader<cmOutput
             else
                 X= this.getRawDataImageKSpace();
             end
-            
-           
-            
-            
             
             o=this.reduceKSpace2DSlice(X,a,c,r,s);
         end
@@ -172,14 +206,23 @@ classdef cm2DRawDataReader<cmOutput
                 function o=getNumberNoiseSlices(this)
             
             o=this.getNSlices(this.getRawDataNoiseKSpace());
+                end
+        
+        
+        function o=getImageDimensions(this)
+            o=this.getKspace3Dsize(this.getRawDataImageKSpace());
         end
         
-        
         function o=getNumberRepetition(this)
-            
+            %it uses the 7D kspace reppresentation 3 is the repetitions
             o=this.getNRepetition(this.getRawDataImageKSpace());
         end
         
+        
+                function o=getNumberCoils(this)
+            %it uses the 7D kspace reppresentation 3 is the repetitions
+            o=this.getNCoil(this.getRawDataImageKSpace());
+        end
         
     
     
@@ -230,7 +273,13 @@ end
 
         
                 
-
+%    function O=getKSpaceAsFPSCR(K,a,c)
+%         %O={'1: Average','2: contrast','3: repetition','4: Frequency Encode','5: Phase Encode','6: Slice','7: Coils'};
+%         k=K(a,c,:,:,:,:,:);
+%         OK=squeeze(k);
+%        O=permute(OK,[2,3,4,5,1]);
+% 
+%    end
         
         
         

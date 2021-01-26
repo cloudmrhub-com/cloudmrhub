@@ -34,18 +34,8 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
         end
         
         
-        function readConf(this,js)
-            this.NumberOfPseudoReplicas=js.NR;
-        end
-        
-        
-        function O=getParams(this)
-            
-            O.Type=this.Type;
-            O.NR=this.NumberOfPseudoReplicas;
-            
-        end
-        
+                
+           
         
         
         
@@ -97,8 +87,40 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
             this.ReferenceImage=ref;
         end
         
+           function [SNR,noise]=getOutput(this)
+            [SNR,noise]= this.calculate();
+            
+           end
         
-        
+           function [OUT]=fakesomedata(this,NR)
+                 %NR=this.getNumberOfPseudoReplicas();
+                    %this method works on 2d images only
+                        OUT=[];
+                    noisecov=this.getNoiseCovariance();
+                    %riccardo lattanzi
+                    [V,D] = eig(noisecov);
+                    corr_noise_factor = V*sqrt(D)*inv(V); %1 i
+                    
+                    %calculate the sensitivity maps once.
+                       K=this.Reconstructor.getSignalKSpace();
+                    
+                   
+                    for r=1:NR
+                        n=this.getPseudoNoise(size(K),corr_noise_factor);
+                        
+                        if(this.Reconstructor.isAccelerated)
+                            n=n.*(K~=0); %also the noise is acceleraed:)
+                        end
+                        
+                        OUT=cat(4,OUT,n+K);
+                    end
+                    
+                    %get back th old kspace
+                    this.Reconstructor.setSignalKSpace(K);
+                
+                end
+               
+           
         function [o, o2]=calculate(this)
             
             
@@ -271,6 +293,21 @@ this.Reconstructor.setCoilSensitivityMatrix(S);
     
     
     methods (Static)
+
+         function N=getFakeRawDataNoise(ksize,NC,corr_noise_factor)
+             %ksize (freq,phase,coil)
+                F=cm2DSignalToNoiseRatioPseudoMultipleReplicas();
+                if nargin<3
+                corr_noise_factor=F.getNoiseCorrelationFactor(NC);
+                end
+                N=F.getPseudoNoise(ksize,corr_noise_factor);
+           end
+        
+        function corr_noise_factor=getNoiseCorrelationFactor(noisecov)
+                [V,D] = eig(noisecov);
+                    corr_noise_factor = V*sqrt(D)*inv(V); %1 i
+           end
+
         function gaussian_whitenoise=getPseudoNoise(msize,corr_noise_factor)
             %msize (freq,phase,coil)
             

@@ -288,7 +288,7 @@ classdef cm2DReconWithSensitivity<cm2DRecon
         
         
         function setCoilSensitivityMatrixSourceSmooth(this,S)
-            this.CoilSensitivityMatrix=S;
+            this.CoilSensitivityMatrixSourceSmooth=S;
         end
         
         function o=getCoilSensitivityMatrixSourceSmooth(this)

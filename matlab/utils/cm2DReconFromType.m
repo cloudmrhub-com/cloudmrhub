@@ -10,7 +10,7 @@ if nargin>0
     %    switch lower(m)
     switch lower(type)
         case 'rss'
-            L=cm2DRecon();
+            L=cm2DReconRSS();
         case {'sense','msense'}
             L=cm2DReconSENSE();
         case 'b1'

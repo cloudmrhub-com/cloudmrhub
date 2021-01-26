@@ -1,14 +1,14 @@
-classdef cm2DSiemensRawDataReader<cmOutput
+classdef cm2DSiemensRawDataReaderNoise<cmOutput
     
     properties
         DATA
-        RemoveOsFromImage=1
+        RemoveOsFromImage=0
         computePF=0 %disabled by deafult
         ReaderFileName
     end
     
     methods
-        function this = cm2DSiemensRawDataReader(f)
+        function this = cm2DSiemensRawDataReaderNoise(f)
             %data are collected and if data is a structure the possible
             %(image) (noise) and refscan will have is own hdr
                 this.ReaderFileName=f;
@@ -21,7 +21,7 @@ classdef cm2DSiemensRawDataReader<cmOutput
             
             if isstruct(DATA) %single raid
                 
-                try;DATA.image.flagRemoveOS=this.RemoveOsFromImage; this.DATA.image=DATA.image();catch;end
+                try; this.DATA.image=DATA.image();catch;end %only diffence with the other class
                 try;this.DATA.imagehdr=DATA.hdr;catch;end
                 try;this.DATA.noise=DATA.noise();catch;end
                 try;this.DATA.noisehdr=DATA.hdr;catch;end
@@ -52,11 +52,7 @@ classdef cm2DSiemensRawDataReader<cmOutput
                     
                 end
                 
-%                 if ~isempty(x)
-%                     this.DATA.internalnoise= DATA{x}.noise();
-%                     this.DATA.internalnoisehdr= DATA{x}.hdr;
-%                     
-%                 end
+
                 
                 
                 
@@ -65,9 +61,7 @@ classdef cm2DSiemensRawDataReader<cmOutput
             
         end
         
-        
-        
-        function o=getNCoils(this)
+          function o=getNCoils(this)
             
             if isempty(this.DATA)
                 this.logIt('any problems reading the number of coils data is empty','ko');
@@ -365,5 +359,7 @@ classdef cm2DSiemensRawDataReader<cmOutput
         end
         
     end
+    
+        
     
 end
