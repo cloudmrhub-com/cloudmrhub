@@ -152,8 +152,6 @@ classdef cmOutput<handle
             else
                 try
                     myjsonWrite(jsonencode(O),this.getOutputFileName());
-                catch
-                    display('not saved to file just got back to the console');
                 end
             end
         end

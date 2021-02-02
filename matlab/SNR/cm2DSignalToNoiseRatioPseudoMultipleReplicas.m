@@ -83,7 +83,7 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
         end
         
         
-        function o=setReferenceImage(this,ref)
+        function setReferenceImage(this,ref)
             this.ReferenceImage=ref;
         end
         

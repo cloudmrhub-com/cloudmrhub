@@ -1,6 +1,6 @@
 function [noise_bandwidth, noise_bandwidth_chan, N_power_spectrum_avg] = mrir_noise_bandwidth(noise, varargin)
 %MRIR_NOISE_BANDWIDTH  calculate noise spectrum and return effective noise bandwidth
-%
+%v14022021
 % bandwidth = mrir_noise_bandwidth(noise)
 %
 % 
@@ -23,20 +23,21 @@ function [noise_bandwidth, noise_bandwidth_chan, N_power_spectrum_avg] = mrir_no
 
   %==--------------------------------------------------------------------==%
   
-  dims = size(noise); % [freq phase channel]
-  power_spectrum = abs(fft(noise, [], 1)).^2;
-  power_spectrum_chan = squeeze(mean(power_spectrum, 2));
-  power_spectrum_norm = mean(power_spectrum_chan([1:dims(1)/4 3*dims(1)/4:end],:),1); % for each channel takes the mean within the central region only
-  norm_power_spectrum_chan = power_spectrum_chan./repmat(power_spectrum_norm, [dims(1), 1]);
+  dims = size(noise); % [freq phase channels]
+  power_spectrum = abs(fft(noise, [], 1)).^2;%fft of the frequencyencoding [freq,phase,channels]
+  power_spectrum_chan = squeeze(mean(power_spectrum, 2)); %mean  of power spectrum on the phasesncoding direction [freq,channels]
+  power_spectrum_norm = mean(power_spectrum_chan(floor([1:dims(1)/4 3*dims(1)/4:end]),:),1); % for each channel takes the mean of the powerspectrum within the central region of the spectrum (low freq?) [1,channels]
+  norm_power_spectrum_chan = power_spectrum_chan./repmat(power_spectrum_norm, [dims(1), 1]);%[freq,channels]
   % individual coils' noise equivalent bandwidth
-  noise_bandwidth_chan = sum(norm_power_spectrum_chan, 1)./dims(1);
-  
-  % global noise equivalent bandwidth
-  N_power_spectrum_avg_normalized = mean(norm_power_spectrum_chan,2);
-  noise_bandwidth = mean(noise_bandwidth_chan,2);
+  noise_bandwidth_chan = sum(norm_power_spectrum_chan, 1)./dims(1); %mean ovver the freq  [1,channels]
   
   
-  if ( DISPLAY ),
+  noise_bandwidth = mean(noise_bandwidth_chan,2); %mean of the channels
+  
+  
+  if ( DISPLAY )
+      % global noise equivalent bandwidth
+  N_power_spectrum_avg_normalized = mean(norm_power_spectrum_chan,2); %mean [freq,1]
       figure('name', mfilename);
       rh = rectangle('position', [0.25*dims(1), 0.001, 0.5*dims(1), 1.098]);
       set(rh, 'FaceColor', 0.9*[1 1 1], 'LineStyle', 'none');

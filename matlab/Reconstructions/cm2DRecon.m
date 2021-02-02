@@ -332,6 +332,118 @@ classdef cm2DRecon<cmOutput
             
         end
         
+%         https://github.com/SyneRBI/tools/blob/fd3404ea96945f75a999bbabd00bb9ab2ea1a91b/gen_us_data.m
+        function write2DCartesianKSpaceDataIsmrmDv1Slice(K7,filename)
+            % It is very slow to append one acquisition at a time, so we're going
+% to append a block of acquisitions at a time.
+% In this case, we'll do it one repetition at a time to show off this
+% feature.  Each block has nY aquisitions
+
+            nX=size(K7,4);
+            nCoils=size(K7,7);
+            
+            nAvg=size(K7,1);
+            nCnt=size(K7,2);
+            nReps=size(K7,3);
+            nPh=size(K7,5);
+            nSl=size(K7,6);
+            nY=nPh;
+            dset = ismrmrd.Dataset(filename);
+
+            %transform in this space
+            %L=permute(K7,[ 4,5,7,3,1,2,6]);
+            
+            %K =L(:,:,:,:,1,1,1);
+acqblock = ismrmrd.Acquisition(nY);
+
+% Set the header elements that don't change
+acqblock.head.version(:) = 1;
+acqblock.head.number_of_samples(:) = nX;
+acqblock.head.center_sample(:) = floor(nX/2);
+acqblock.head.active_channels(:) = nCoils;
+acqblock.head.read_dir  = repmat([1 0 0]',[1 nY]);
+acqblock.head.phase_dir = repmat([0 1 0]',[1 nY]);
+acqblock.head.slice_dir = repmat([0 0 1]',[1 nY]);
+
+% Loop over the acquisitions, set the header, set the data and append
+for rep = 1:nReps
+    for acqno = 1:nY
+        
+        % Set the header elements that change from acquisition to the next
+        % c-style counting
+        acqblock.head.scan_counter(acqno) = (rep-1)*nY + acqno-1;
+        acqblock.head.idx.kspace_encode_step_1(acqno) = acqno-1; 
+        acqblock.head.idx.repetition(acqno) = rep - 1;
+        
+        % Set the flags
+        acqblock.head.flagClearAll(acqno);
+        if acqno == 1
+            acqblock.head.flagSet('ACQ_FIRST_IN_ENCODE_STEP1', acqno);
+            acqblock.head.flagSet('ACQ_FIRST_IN_SLICE', acqno);
+            acqblock.head.flagSet('ACQ_FIRST_IN_REPETITION', acqno);
+        elseif acqno==size(K,2)
+            acqblock.head.flagSet('ACQ_LAST_IN_ENCODE_STEP1', acqno);
+            acqblock.head.flagSet('ACQ_LAST_IN_SLICE', acqno);
+            acqblock.head.flagSet('ACQ_LAST_IN_REPETITION', acqno);
+        end
+        
+        % fill the data
+        acqblock.data{acqno} = squeeze(K(:,acqno,:,rep));
+    end
+
+    % Append the acquisition block
+    dset.appendAcquisition(acqblock);
+        
+end % rep loop
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Fill the xml header %
+%%%%%%%%%%%%%%%%%%%%%%%%
+% We create a matlab struct and then serialize it to xml.
+% Look at the xml schema to see what the field names should be
+
+header = [];
+
+% Experimental Conditions (Required)
+header.experimentalConditions.H1resonanceFrequency_Hz = 128000000; % 3T
+
+% Acquisition System Information (Optional)
+header.acquisitionSystemInformation.systemVendor = 'ISMRMRD Labs';
+header.acquisitionSystemInformation.systemModel = 'Virtual Scanner';
+header.acquisitionSystemInformation.receiverChannels = nCoils;
+
+% The Encoding (Required)
+header.encoding.trajectory = 'cartesian';
+header.encoding.encodedSpace.fieldOfView_mm.x = 256;
+header.encoding.encodedSpace.fieldOfView_mm.y = 256;
+header.encoding.encodedSpace.fieldOfView_mm.z = 5;
+header.encoding.encodedSpace.matrixSize.x = size(K,1);
+header.encoding.encodedSpace.matrixSize.y = size(K,2);
+header.encoding.encodedSpace.matrixSize.z = 1;
+% Recon Space
+% (in this case same as encoding space)
+header.encoding.reconSpace = header.encoding.encodedSpace;
+% Encoding Limits
+header.encoding.encodingLimits.kspace_encoding_step_0.minimum = 0;
+header.encoding.encodingLimits.kspace_encoding_step_0.maximum = size(K,1)-1;
+header.encoding.encodingLimits.kspace_encoding_step_0.center = floor(size(K,1)/2);
+header.encoding.encodingLimits.kspace_encoding_step_1.minimum = 0;
+header.encoding.encodingLimits.kspace_encoding_step_1.maximum = size(K,2)-1;
+header.encoding.encodingLimits.kspace_encoding_step_1.center = floor(size(K,2)/2);
+header.encoding.encodingLimits.repetition.minimum = 0;
+header.encoding.encodingLimits.repetition.maximum = nReps-1;
+header.encoding.encodingLimits.repetition.center = 0;
+
+%% Serialize and write to the data set
+xmlstring = ismrmrd.xml.serialize(header);
+dset.writexml(xmlstring);
+
+%% Write the dataset
+dset.close();
+        end
+        
+        
         function write2DCartesianKspacedatainISMRMRDv1(K,filename)
             % It is very slow to append one acquisition at a time, so we're going
             % to append a block of acquisitions at a time.
@@ -372,18 +484,19 @@ classdef cm2DRecon<cmOutput
             
             nX=size(K,4);
             nCoils=size(K,7);
-            nYsamp=prod(size(K))/(nX*nCoils);
+            
             nAvg=size(K,1);
             nCnt=size(K,2);
             nRep=size(K,3);
             nPh=size(K,5);
             nSl=size(K,6);
             
+            nYsamp=nPh;% ERROR nYsamp=prod(size(K))/(nX*nCoils);
             %nYsamp is number of actually
             acqblock = ismrmrd.Acquisition(nYsamp);
             
             
-            % Set the header elements that don't change
+            % Set the header elements that doesn't change
             acqblock.head.version(:) = 1;
             acqblock.head.number_of_samples(:) = nX;
             acqblock.head.center_sample(:) = floor(nX/2);
@@ -513,7 +626,7 @@ classdef cm2DRecon<cmOutput
             header.acquisitionSystemInformation.systemModel = 'CM scanner v01';
             header.acquisitionSystemInformation.receiverChannels = nCoils;
             header.acquisitionSystemInformation.systemFieldStrength_T=2.893620;
-            header.acquisitionSystemInformation.relativeReceiverNoiseBandwidth=0793;
+            header.acquisitionSystemInformation.relativeReceiverNoiseBandwidth=0.793;
             
             % The Encoding (Required)
             header.encoding.trajectory = 'cartesian';

@@ -102,7 +102,7 @@ classdef cm2DRawDataReader<cmOutput
             
             o=this.RawDataImageKSpace;
             catch
-                o=[]
+                o=[];
             end
             
             

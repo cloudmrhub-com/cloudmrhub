@@ -12,7 +12,7 @@ O=[];
 
 NCLOILS=NRD.getNCoil(K);
 NSLICES=NRD.getNSlices(K);
-NREP=NRD.getNRepetition(K)
+NREP=NRD.getNRepetition(K);
 NAV=NRD.getNAverages(K);
 NCNT=NRD.getNContrast(K);
 
