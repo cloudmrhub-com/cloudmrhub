@@ -72,7 +72,7 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicasWien<cm2DSignalToNoiseRatio
        
         
                 function o=getPseudoMultipleReplicaSignalImage(this)
-            o= this.Reconstructor.getOutput();
+            o= abs(this.Reconstructor.getOutput());
         end
         
         

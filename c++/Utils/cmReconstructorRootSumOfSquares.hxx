@@ -1,8 +1,8 @@
-#ifndef __cmVectorImageRootSumOfSquaresReconstructor_hxx
-#define __cmVectorImageRootSumOfSquaresReconstructor_hxx
+#ifndef __cmReconstructorRootSumOfSquares_hxx
+#define __cmReconstructorRootSumOfSquares_hxx
 
 
-#include "cmVectorImageRootSumOfSquaresReconstructor.h"
+#include "cmReconstructorRootSumOfSquares.h"
 #include "itkImageAlgorithm.h"
 #include "itkImageRegionIterator.h"
 #include "vnl/vnl_inverse.h"
@@ -10,7 +10,7 @@
 #include "vnl/vnl_matrix_fixed.h"
 #include "vnl/algo/vnl_matrix_inverse.h"
 
-#include "cmSumOfSquareImageFilter.h"
+#include "cmRootSumOfSquareImageFilter.h"
 
 
 
@@ -18,12 +18,12 @@ namespace cm
 {
 
 template< class TImage,class TOImage>
-void VectorImageRootSumOfSquaresReconstructor< TImage,TOImage>
+void ReconstructorRootSumOfSquares< TImage,TOImage>
 ::GenerateData()
  {
 	std::cout<<"RSS recon"<<std::endl;
 
-	typedef typename cm::SumOfSquareImageFilter<TImage,TOImage> P2;
+	typedef typename cm::RootSumOfSquareImageFilter<TImage,TOImage> P2;
 	typename P2::Pointer pp2= P2::New();
 
 

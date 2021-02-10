@@ -10,7 +10,7 @@
 
 #include "cmISMRMRDToITKImageFilter.h"
 
-#include "cmSumOfSquareImageFilter.h"
+#include "cmRootSumOfSquareImageFilter.h"
 #pragma once
 #include "ismrmrd/ismrmrd.h"
 #include "ismrmrd/dataset.h"
@@ -29,7 +29,7 @@ namespace cm
 
 
 template< class TImage>
-std::vector<TImage::Pointer> ISMRMRDToITKImageFilter< TImage>
+std::vector<typename TImage::Pointer> ISMRMRDToITKImageFilter< TImage>
 ::getReplicas(std::string Type){
 
 	std::cout<<"Repetition"<<std::endl;
@@ -37,7 +37,7 @@ std::vector<TImage::Pointer> ISMRMRDToITKImageFilter< TImage>
 	std::vector<TImage::Pointer> OUT(this->getNumberOfRepetition());
 
 
-	//the acqisition
+	//the acquisition
 
 	//must be instantiated with a filename
 	ISMRMRD::Dataset ismrmdataset(this->GetIsmrmrdFileName().c_str(),"dataset", false);
@@ -236,20 +236,20 @@ void ISMRMRDToITKImageFilter< TImage>
 
 	H=acq.getHead();
 
-	std::cout<<"step1"<<counter.kspace_encode_step_1<<","
-			<<"step2"<<counter.kspace_encode_step_2<<","
-			<<"slice"<<counter.slice<<","
-			<<"cnt"<<counter.contrast<<","
-			<<"ph"<<counter.phase<<","
-			<<"rep"<<counter.repetition<<","
-			<<"set"<<counter.set<<","
-			<<"segm"<<counter.segment<<"\t"
-			<<"flag"<<H.flags<<std::endl;
+//	std::cout<<"step1"<<counter.kspace_encode_step_1<<","
+//			<<"step2"<<counter.kspace_encode_step_2<<","
+//			<<"slice"<<counter.slice<<","
+//			<<"cnt"<<counter.contrast<<","
+//			<<"ph"<<counter.phase<<","
+//			<<"rep"<<counter.repetition<<","
+//			<<"set"<<counter.set<<","
+//			<<"segm"<<counter.segment<<"\t"
+//			<<"flag"<<H.flags<<std::endl;
 
 
 
 
-	std::cout<<H.isFlagSet(ISMRMRD::ISMRMRD_AcquisitionFlags::ISMRMRD_ACQ_IS_NOISE_MEASUREMENT)<<std::endl;
+//	std::cout<<H.isFlagSet(ISMRMRD::ISMRMRD_AcquisitionFlags::ISMRMRD_ACQ_IS_NOISE_MEASUREMENT)<<std::endl;
 
 
 
@@ -259,7 +259,7 @@ void ISMRMRDToITKImageFilter< TImage>
 		EE++;
 		//std::cout<<*a<<std::endl;
 	}
-	std::cout<<EE<<std::endl;
+//	std::cout<<EE<<std::endl;
 
 
  }
@@ -279,7 +279,7 @@ std::vector<float>  ISMRMRDToITKImageFilter< TImage>
 	 //cicle on each acquisition and get vector z
 	 for (auto p=0; p<ismrmdataset.getNumberOfAcquisitions();p++)
 	  {
-		 std::cout<<"iteration: "<<p<<" over "<<ismrmdataset.getNumberOfAcquisitions();
+//		 std::cout<<"iteration: "<<p<<" over "<<ismrmdataset.getNumberOfAcquisitions();
 	 	 ISMRMRD::Acquisition acq;
 	 	 ISMRMRD::AcquisitionHeader O;
 	 	 //read the acquisition
@@ -291,15 +291,22 @@ std::vector<float>  ISMRMRDToITKImageFilter< TImage>
 	 		 O=acq.getHead();
 
 	 		 position=O.position;
-	 		 std::cout<<"---position: "<<position[2]<<std::endl;
+//	 		 std::cout<<"---position: "<<position[2]<<std::endl;
 	 		 slices.push_back(position[2]);
 	 	 }
 	  }
 
 
+
+
 	 std::sort( slices.begin(), slices.end() );
 
+
+
 	 slices.erase( std::unique( slices.begin(), slices.end() ), slices.end() );
+	 std::cout<< "the slices ";
+		 for(int i : slices)
+		   std::cout << "i = " << i << std::endl;
 	 std::cout<<"slices ordered"<<std::endl;
 
 	 return slices;
@@ -374,7 +381,7 @@ std::vector<float> SLICEPOSITION=this->getSliceOrder();
 
 
 for( unsigned i = 0; i < SLICEPOSITION.size(); ++i ) {
-std::cout<<"Position: "<<i<<" that's the position"<<SLICEPOSITION[i]<<std::endl;
+std::cout<<"Slice at position : "<<i<<" in real world space was "<<SLICEPOSITION[i]<<std::endl;
 };
 
  VectorImageInnerPixelType NR=1;
@@ -415,8 +422,9 @@ std::cout<<"Position: "<<i<<" that's the position"<<SLICEPOSITION[i]<<std::endl;
 		 O=acq.getHead();
 
 		position=O.position;
-
 		 int slicepos = std::distance(SLICEPOSITION.begin(), std::find(SLICEPOSITION.begin(), SLICEPOSITION.end(),position[2] ));
+
+
 		 //counter.slice
 		 index={0,counter.kspace_encode_step_1,slicepos};
 
@@ -599,14 +607,14 @@ IM->Allocate();
 
  if(this->GetremoveFrequencyOversampling()){
 
-	 std::cout<<min<<std::endl;
+//	 std::cout<<min<<std::endl;
 
 	 typename VectorImageType::PointType oVSP;
 
 	 typename VectorImageType::IndexType ind={floor(SIZE[0]/2),0,0};
 	 IM->TransformIndexToPhysicalPoint(ind,oVSP);
 	 min[0]=min[0]+std::sqrt(std::pow((oVSP[0]-min[0]),2));
-	 std::cout<<min<<std::endl;
+//	 std::cout<<min<<std::endl;
 
 	 IM->SetOrigin(min);
  };
@@ -637,13 +645,13 @@ void ISMRMRDToITKImageFilter< TImage>
 
 		typename TImage::Pointer IM=this->tridimensionalRead();
 //		std::cout<<IM;
-//		IM->GetPixel({{20,20,20}});
-//
-//		typedef typename cm::SumOfSquareImageFilter<TImage,itk::Image<vcl_complex<float>,3>> SOS;
-//		typename SOS::Pointer sos= SOS::New();
-//		sos->SetInput(IM);
-//		sos->Update();
-//		sos->SetKSpaceDimension(cm::KSpaceAcquisitionDimension::TRIDIMENSIONAL);
+		IM->GetPixel({{20,20,20}});
+
+		typedef typename cm::RootSumOfSquareImageFilter<TImage,itk::Image<vcl_complex<float>,3>> SOS;
+		typename SOS::Pointer sos= SOS::New();
+		sos->SetInput(IM);
+		sos->Update();
+		sos->SetKSpaceDimension(cm::KSpaceAcquisitionDimension::TRIDIMENSIONAL);
 
 
 

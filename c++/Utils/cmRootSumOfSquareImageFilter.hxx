@@ -1,10 +1,10 @@
-#ifndef __cmSumOfSquareImageFilter_hxx
-#define __cmSumOfSquareImageFilter_hxx
+#ifndef __cmRootSumOfSquareImageFilter_hxx
+#define __cmRootSumOfSquareImageFilter_hxx
 
 #include "itkVectorImage.h"
-#include "cmSumOfSquareImageFilter.h"
+#include "cmRootSumOfSquareImageFilter.h"
 #include "itkImageAlgorithm.h"
-//#include "NYi.h"
+
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
 #include "cmiFFTPhasedArrayFilter.h"
@@ -20,7 +20,7 @@ namespace cm
 
 
 template< class TImage,class TOImage>
-void SumOfSquareImageFilter< TImage,TOImage>
+void RootSumOfSquareImageFilter< TImage,TOImage>
 ::GenerateData()
  {
 			using ifftType= cm::iFFTPhasedArrayFilter<TImage>;
@@ -38,7 +38,7 @@ void SumOfSquareImageFilter< TImage,TOImage>
 					itk::ImageRegionConstIterator<TImage> it(ifft->GetOutput(),ifft->GetOutput()->GetLargestPossibleRegion());
 					itk::ImageRegionIterator<TOImage> ot(output,output->GetLargestPossibleRegion());
 
-					/* prepare */
+					/* prepare */   
 							it.GoToBegin();
 							ot.GoToBegin();
 

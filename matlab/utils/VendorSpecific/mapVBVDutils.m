@@ -112,7 +112,10 @@ try ;info.spacingBetweenslices=C.SpacingBetweenSlices;end;
 info.scanner.B0=DATA.hdr.Dicom.flMagneticFieldStrength;
 
 
-
+nf=DATA.hdr.Config.RoFOV;
+removeOS=[1:nf/4, 1+nf*3/4:nf];
+totake=setdiff([1:nf],removeOS);
+info.removeOSIndexes=totake;
 
 
 

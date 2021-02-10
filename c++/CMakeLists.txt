@@ -46,8 +46,12 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive -fopenmp")
 
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fopenmp")
 
-#ismrmrd kspace to mhd
-#ADD_SUBDIRECTORY(Tests/ismrmrdToMha)
 
-ADD_SUBDIRECTORY(Tests/cm2DRecon)
-ADD_SUBDIRECTORY(Tests/generateFakeKspaceData)
+# can we read ismrmrd?:)
+ADD_SUBDIRECTORY(Tests/ReadingTest)
+# yes we can!:)
+
+
+# can we reconstruct RSS?
+ADD_SUBDIRECTORY(Reconstructors/2DRecon)
+# yes we can!:)
