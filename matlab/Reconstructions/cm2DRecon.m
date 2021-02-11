@@ -160,7 +160,7 @@ classdef cm2DRecon<cmOutput
             o=this.SignalSize;
         end
         
-        function o=getNoiseCoeffefficient(this)
+        function o=getNoiseCoefficient(this)
             o=this.calculateNoiseCoefficientsMatrix(this.getNoiseCovariance);
         end
         
