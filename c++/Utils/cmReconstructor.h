@@ -77,6 +77,10 @@ itkSetMacro(NoiseCovarianceMatrix,ChannelArrayType);
 cm::ChannelArrayType GetNoiseCovarianceMatrix();
 
 
+ 	itkSetMacro(InverseNoiseCovariance,ChannelArrayType);
+    itkGetMacro(InverseNoiseCovariance,ChannelArrayType);
+
+
 itkGetMacro(NoiseCoefficientMatrix,ChannelArrayType);
 itkSetMacro(NoiseCoefficientMatrix,ChannelArrayType);
 
@@ -90,9 +94,12 @@ itkSetMacro(NoiseCoefficientMatrix,ChannelArrayType);
  	itkSetMacro(InputIFFT,VectorImageTypePointer);
  	VectorImageTypePointer GetInputIFFT();
 
+ 	VectorImageTypePointer GetPrewhitenedSignal();
+
 ChannelArrayType CalculateNoiseCovarianceMatrix();
 VectorImageInternalPixelType CalculateNoiseBW();
 ChannelArrayType CalculateNoiseCoefficientMatrix();
+ChannelArrayType CalculateInverseCovariance();
 
 //public can query but can't set it:)
 itkGetMacro(HasSensitivity,bool);
@@ -141,6 +148,7 @@ private:
   float m_NoiseBandWidth;
   
   ChannelArrayType m_NoiseCovarianceMatrix;
+    ChannelArrayType m_InverseNoiseCovariance;
 
   ChannelArrayType m_NoiseCoefficientMatrix;
   //  KSpace of noise

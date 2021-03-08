@@ -52,6 +52,10 @@ ADD_SUBDIRECTORY(Tests/ReadingTest)
 # yes we can!:)
 
 
-# can we reconstruct RSS?
+# can we reconstruct image and SNR?
 ADD_SUBDIRECTORY(Reconstructors/2DRecon)
+# yes we can!:) RSS and B1
+
+# can we calulate MR and PMR?
+ADD_SUBDIRECTORY(Reconstructors/2DMR)
 # yes we can!:)

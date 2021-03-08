@@ -75,7 +75,7 @@ protected:
 		//calculate the sensitivity map
 		this->GetSensitivityMap();
 		this->GetInputIFFT();
-		this->CalculateInverseCovariance();
+//		this->CalculateInverseCovariance();
 	};
 
 private:

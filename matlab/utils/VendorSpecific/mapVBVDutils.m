@@ -57,12 +57,14 @@ MY=DATA.hdr.MeasYaps;
 
 info.SiemensVersion       = DATA.image.softwareVersion;
 
-info.seq.siz=[DATA.hdr.Config.RoFOV DATA.hdr.Config.PeFOV ];
+info.seq.size=[DATA.hdr.Config.RoFOV DATA.hdr.Config.PeFOV ];
+
 
 info.BaseResolution=DATA.hdr.Config.BaseResolution;
 try;info.GlobalImageScaleFactor=DATA.hdr.Config.GlobalImageScaleFactor;end;
 try;info.ImaScaleFactor=DATA.hdr.Config.ImaScaleFactor;end;
-info.SIZE=[DATA.hdr.Config.ImageColumns DATA.hdr.Config.ImageLines];
+info.MatrixSize=[DATA.hdr.Config.ImageColumns DATA.hdr.Config.ImageLines];
+info.Resolution=info.seq.size./info.MatrixSize;
 info.NFEncoding=DATA.hdr.Config.NColMeas;
 try;info.ReadoutOversampling=DATA.hdr.Config.ReadoutOversamplingFactor;end;
 
@@ -120,11 +122,15 @@ info.removeOSIndexes=totake;
 
 
 
-
-
-
-
-
+%size and fov of the kspace for isrmrd
+if(~info.seq.is3D)
+    
+info.ismrmrd.efov =[DATA.hdr.Config.RoFOV DATA.hdr.Config.PeFOV  info.NSlc* info.spacingBetweenslices];
+info.ismrmrd.rfov = info.ismrmrd.efov;
+info.ismrmrd.ematrix = [DATA.hdr.Config.ImageColumns DATA.hdr.Config.ImageLines info.NSlc];
+info.ismrmrd.rmatrix = info.ismrmrd.ematrix
+     
+end
 
 
 

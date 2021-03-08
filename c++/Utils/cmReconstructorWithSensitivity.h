@@ -54,15 +54,6 @@ public:
 
      VectorImageTypePointer GetSensitivityMap();
 
-     void CalculateInverseCovariance(){
-
-		 	 ChannelArrayType O;
-		 	 O=vnl_matrix_inverse<VectorImageInternalPixelType>(this->GetNoiseCovarianceMatrix());
-		 	 	
-    	 this->SetInverseNoiseCovariance(O);
-		 	 std::cout<<"inverse covariance matrix set"<<std::endl;
-
-     };
 
      void ResetSensivityMap(){
     	 this->m_SensitivityMap= nullptr;
@@ -81,8 +72,7 @@ public:
      	itkGetMacro(SensitivityMapCalculationMode,	cm::SensitivityMapCalculation);
      	itkSetMacro(SensitivityMapCalculationMode,	cm::SensitivityMapCalculation);
 
-    	itkSetMacro(InverseNoiseCovariance,ChannelArrayType);
-   		itkGetMacro(InverseNoiseCovariance,ChannelArrayType);
+
 
 
 protected:

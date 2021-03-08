@@ -51,6 +51,10 @@ int main(int argc, char *argv[]) {
 	std::string NType="noiseFile";
 
 	/**Reconstruciton type. */
+    std::string RECONTYPE="Reconstruction";
+
+
+	/**Reconstruciton type. */
 	std::string RECON="RSS";
 
 	/**Noise Bandwidth evaluation method. */
@@ -83,10 +87,12 @@ int main(int argc, char *argv[]) {
 
 
 	/** The options */
-	po::options_description desc("The software calculates 2D SNR from two ismrmrd file, noise and signal: Allowed options");
+	po::options_description desc("The software calculates 2D SNR or reconstruciton from two ismrmrd file, noise and signal: Allowed options");
 	desc.add_options()("help,h", "Produce HELP message")
 																	("signalfilename,s",po::value<std::string>(&SFN), " Signal Filename (H5)")
 																	("noiselfilename,n",po::value<std::string>(&NFN), " Noise Filename (H5)")
+																	("function,f",po::value<std::string>(&RECONTYPE), " Reconstruction or SNR")
+
 																	("noisetype,t",po::value<std::string>(&NType), " Noise Type (noiseFile,selfMulti,selfSingle)")
 																	("outputimage,o",po::value<std::string>(&OFN), " OUTPUTIMAGE file")
 																	("noisebandwidthvalue,b",po::value<float>(&NBWv), " noise BW value")
@@ -130,7 +136,21 @@ int main(int argc, char *argv[]) {
 	}
 
 
+//check if the reconstructor type is set correctly
 
+	const std::string R = boost::algorithm::to_lower_copy(RECONTYPE);
+	std::cout<<R<<"\n"<<"\n\n"<<std::endl;
+
+
+	if (boost::iequals(R,"reconstruction") || (boost::iequals(R,"snr")))
+		{
+			std::cout<<R<<std::endl;
+
+		}
+		else
+		{		std::cout << "Choose between to reconstruct the image (-f reconstruction) or to calculate the snr (-f snr) "<<"\n"<<myerror << "\n";
+		return 1;
+		}
 
 
 
@@ -152,8 +172,19 @@ int main(int argc, char *argv[]) {
 		rn->Update();
 	}
 
+
+
 	//Filter Area
-	mroptimum::ReconstructorType::Pointer filter=mroptimum::selectReconstructor(RECON);
+	mroptimum::ReconstructorType::Pointer filter;
+
+	if (boost::iequals(R,"reconstruction")){
+	filter=mroptimum::selectReconstructor(RECON);
+	}
+
+
+	if (boost::iequals(R,"snr")){
+	filter=mroptimum::selectSNRUnitsReconstructor(RECON);
+	}
 
 
 	filter->SetInput(rs->GetOutput());

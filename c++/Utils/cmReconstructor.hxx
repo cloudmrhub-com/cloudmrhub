@@ -83,6 +83,8 @@ std::cout<<size<<"KSPACE SIZE";
 
 	this->SetNoiseCovarianceMatrix(this->CalculateNoiseCovarianceMatrix());
 
+	this->SetInverseNoiseCovariance(this->CalculateInverseCovariance());
+
 }
 
 template< class TImage,class TOImage>
@@ -102,6 +104,19 @@ typename TImage::InternalPixelType Reconstructor< TImage,TOImage>
 	}
 	return NBW/ (typename TImage::InternalPixelType)noise.rows();
  }
+
+
+template< class TImage,class TOImage>
+vnl_matrix<typename TImage::InternalPixelType> Reconstructor< TImage,TOImage>::CalculateInverseCovariance(){
+
+		 	 ChannelArrayType O;
+		 	 O=vnl_matrix_inverse<VectorImageInternalPixelType>(this->GetNoiseCovarianceMatrix());
+
+   	 return O;
+//		 	 std::cout<<"inverse covariance matrix set"<<std::endl;
+
+    };
+
 
 
 
@@ -185,12 +200,8 @@ vnl_matrix<typename TImage::InternalPixelType> Reconstructor< TImage,TOImage>
 
 template< class TImage,class TOImage>
 typename TImage::Pointer Reconstructor< TImage,TOImage>
-::GetInputIFFT()
+::GetPrewhitenedSignal()
  {
-	 std::cout<<"requested the inverse ifft of the signal"<<std::endl;
-	if ( this->m_InputIFFT == nullptr ){
-
-
 	 	 	 	 VectorImageTypePointer IF=this->GetInput();
 
 	 	 	 	std::cout<<"Prewhitening of the signal KSpace"<<std::endl;
@@ -200,14 +211,26 @@ typename TImage::Pointer Reconstructor< TImage,TOImage>
 	 	 	 	prewhite->SetNoiseCovarianceMatrix(this->GetNoiseCovarianceMatrix());
 	 	 	 	prewhite->Update();
 
+	 	 	 	return prewhite->GetOutput();
+
+ }
 
 
+template< class TImage,class TOImage>
+typename TImage::Pointer Reconstructor< TImage,TOImage>
+::GetInputIFFT()
+ {
+	 std::cout<<"requested the inverse ifft of the signal"<<std::endl;
+	if ( this->m_InputIFFT == nullptr ){
+
+
+	 	 	 	 VectorImageTypePointer IF=this->GetPrewhitenedSignal();
 
 				typedef cm::iFFTPhasedArrayFilter<VectorImageType> IFFTFilter;
 				typename IFFTFilter::Pointer ifFilter= IFFTFilter::New();//=this->GetIfft();
 
 				ifFilter->SetKSpaceDimension(this->GetKSpaceDimension());
-				ifFilter->SetInput(prewhite->GetOutput());
+				ifFilter->SetInput(this->GetPrewhitenedSignal());
 				ifFilter->Update();
 				this->SetInputIFFT(ifFilter->GetOutput());
 

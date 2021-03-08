@@ -11,7 +11,7 @@
 #include "vnl/algo/vnl_matrix_inverse.h"
 
 #include "cmRootSumOfSquareImageFilter.h"
-
+#include "itkPasteImageFilter.h"
 
 
 namespace cm
@@ -19,20 +19,54 @@ namespace cm
 
 template< class TImage,class TOImage>
 void ReconstructorRootSumOfSquares< TImage,TOImage>
-::GenerateData()
+::ThreadedGenerateData(const VectorImageRegionType& outputRegionForThread, itk::ThreadIdType threadId)
  {
-	std::cout<<"RSS recon"<<std::endl;
-
-	typedef typename cm::RootSumOfSquareImageFilter<TImage,TOImage> P2;
-	typename P2::Pointer pp2= P2::New();
 
 
-	pp2->SetInput(this->GetInput());
-	pp2->SetKSpaceDimension(this->GetKSpaceDimension());
-	pp2->Update();
+	VectorImageTypePointer KSPACEDATAIFFT=this->GetInputIFFT();
+
+	const int Kdimension =KSPACEDATAIFFT->GetNumberOfComponentsPerPixel();
+
+	ScalarImageTypePointer OUT=this->GetOutput();
 
 
-	this->GetOutput()->Graft(pp2->GetOutput());
+
+				itk::ImageRegionIterator<VectorImageType> it(KSPACEDATAIFFT,outputRegionForThread);
+				itk::ImageRegionIterator<ScalarImageType> io(OUT,outputRegionForThread);
+
+				it.GoToBegin();
+				io.GoToBegin();
+
+
+
+
+
+				 VectorImagePixelType I;
+				 ChannelArrayType IV(Kdimension,1);
+
+				 ChannelArrayType OV(1,1);
+
+
+		/* BANG!!*/
+				while( !it.IsAtEnd() )
+				{
+					I=it.Get();
+					/* reset counter and calculate the sos*/
+					OV=(ScalarImagePixelType) (0.0,0.0);
+
+					/*sum of squares*/
+					for (auto t=0;t<I.GetSize();t++)
+					{
+						OV(0,0)+=std::pow(std::abs(I.GetElement(t)),2);
+					}
+
+					/* root*/
+					OV=std::sqrt(OV(0,0));
+					io.Set(OV(0,0));
+					++it;
+					++io;
+				}
+
 
 
 
@@ -40,12 +74,11 @@ void ReconstructorRootSumOfSquares< TImage,TOImage>
 
 
 
+
 }// end namespace
 
 
 #endif
-
-
 
 
 

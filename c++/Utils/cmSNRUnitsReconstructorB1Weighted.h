@@ -1,16 +1,16 @@
-#ifndef __cmReconstructorRootSumOfSquares_h
-#define __cmReconstructorRootSumOfSquares_h
+#ifndef __cmSNRUnitsReconstructorB1Weighted_h
+#define __cmSNRUnitsReconstructorB1Weighted_h
 
 #pragma once
 #include "cm.h"
-#include "cmReconstructor.h"
+#include "cmReconstructorB1Weighted.h"
 
 
 
 namespace cm
 {
 
-/** \class ReconstructorRootSumOfSquares
+/** \class SNRUnitsReconstructorB1Weighted
  * \brief This class calculates SNR on a 2D k-space phased array image using Root sum of squares (RSS).
  * \author Eros Montin,PhD \email eros.montin@nyulangone.org
  * \author Prof. Riccardo Lattanzi,PhD \email riccardo.lattanzi@nyulangone.org
@@ -20,12 +20,12 @@ namespace cm
 
 
 template< class TImage,class TOImage>
-class ReconstructorRootSumOfSquares:public Reconstructor< TImage, TOImage >
+class SNRUnitsReconstructorB1Weighted:public ReconstructorB1Weighted< TImage, TOImage >
 {
 public:
   /* Standard class typedefs. (similar to using..)*/
-  typedef ReconstructorRootSumOfSquares                                                 Self;
-  typedef Reconstructor< TImage, TOImage > Superclass;
+  typedef SNRUnitsReconstructorB1Weighted                                                 Self;
+  typedef ReconstructorB1Weighted< TImage, TOImage > Superclass;
   typedef itk::SmartPointer< Self >                                Pointer;
   typedef itk::SmartPointer< const Self >                                ConstPointer;
 
@@ -33,7 +33,7 @@ public:
   itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro(ReconstructorRootSumOfSquares, Reconstructor);
+  itkTypeMacro(SNRUnitsReconstructorB1Weighted, ReconstructorB1Weighted);
 
 
   /*  the main image type*/
@@ -41,8 +41,9 @@ public:
      typedef typename TImage::Pointer VectorImageTypePointer;   
      typedef typename TImage::PixelType VectorImagePixelType;
      typedef typename TImage::InternalPixelType VectorImageInternalPixelType;   
-     typedef typename VectorImageType::RegionType          VectorImageRegionType;
-    	typedef typename itk::ImageRegionIterator<VectorImageType>        VectorImageIteratorType;
+ 	 typedef typename VectorImageType::RegionType          VectorImageRegionType;
+ 	 typedef typename itk::ImageRegionIterator<VectorImageType>        VectorImageIteratorType;
+
      typedef TOImage                   ScalarImageType;
      typedef typename TOImage::Pointer ScalarImagePointerType;
      typedef typename TOImage::PixelType ScalarImagePixelType;
@@ -55,14 +56,10 @@ public:
 
 
 
+
 protected:
-  ReconstructorRootSumOfSquares(){
-	  this->SetHasAcceleration(false);
-	  this->SetHasSensitivity(false);
-
-  }
-  ~ReconstructorRootSumOfSquares(){}
-
+     SNRUnitsReconstructorB1Weighted() : Superclass() {}
+  ~SNRUnitsReconstructorB1Weighted(){}
 
 
   // virtual void GenerateData();
@@ -77,21 +74,18 @@ protected:
   		this->GetInputIFFT();
   	};
 
-
 private:
-  ReconstructorRootSumOfSquares(const Self &); //purposely not implemented
+  SNRUnitsReconstructorB1Weighted(const Self &); //purposely not implemented
   void operator=(const Self &);  //purposely not implemented
- // bool m_UseCovarianceMatrix;
-  /* Does the real work. */
-//  virtual void GenerateData();
+
 
 };
 } //namespace CM
 
 
 #ifndef ITK_MANUAL_INSTANTIATION
-#include "cmReconstructorRootSumOfSquares.hxx"
+#include "cmSNRUnitsReconstructorB1Weighted.hxx"
 #endif
 
 
-#endif // __ReconstructorRootSumOfSquares_h
+#endif // __SNRUnitsReconstructorB1Weighted_h
