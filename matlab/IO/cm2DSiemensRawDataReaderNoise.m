@@ -219,7 +219,10 @@ classdef cm2DSiemensRawDataReaderNoise<cmOutput
         
         
         
-        
+         function info=getFiIeInfo(this)
+            [~,~, info]=mapVBVDutils(this.ReaderFileName)
+            
+        end
         
         
         

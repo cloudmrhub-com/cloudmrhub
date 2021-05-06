@@ -224,7 +224,10 @@ classdef cm2DSiemensRawDataReader<cmOutput
         
         
         
-        
+        function info=getFiIeInfo(this)
+            [~,~, info]=mapVBVDutils(this.ReaderFileName);
+            
+        end
         
         
         

@@ -87,7 +87,9 @@ classdef cm2DRawDataReader<cmOutput
         
         
      
-        
+        function o=getFileinfo(this)
+            o=this.Reader.getFiIeInfo();
+        end
         
         
         function o=getRawDataImageKSpace(this)
