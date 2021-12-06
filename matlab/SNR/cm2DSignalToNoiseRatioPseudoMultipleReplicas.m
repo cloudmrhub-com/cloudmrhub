@@ -109,7 +109,7 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
                         n=this.getPseudoNoise(size(K),corr_noise_factor);
                         
                         if(this.Reconstructor.isAccelerated)
-                            n=n.*(K~=0); %also the noise is acceleraed:)
+                            n=n.*(K~=0); %also the noise is accelerated:)
                         end
                         
                         OUT=cat(4,OUT,n+K);

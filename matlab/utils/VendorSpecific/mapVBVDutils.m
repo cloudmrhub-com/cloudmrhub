@@ -74,6 +74,12 @@ info.NAve=DATA.hdr.Config.NAve;
 info.NRep=DATA.hdr.Config.NRep;
 info.NSeg=DATA.hdr.Config.NSeg;
 
+try info.Institution.Address=D.InstitutionAddress;end
+try info.Institution.Name=D.InstitutionName;end
+try;info.coils.transmitting=D.TransmittingCoil;end
+try;info.Manufacturer=D.Manufacturer;end
+try;info.ManufacturerModelName=D.ManufacturersModelName;end
+
 
 info.NoOfFourierLines=DATA.hdr.Config.NoOfFourierLines;
 try;info.NoiseScaleFactor=DATA.hdr.Config.NoiseScaleFactor;end;
