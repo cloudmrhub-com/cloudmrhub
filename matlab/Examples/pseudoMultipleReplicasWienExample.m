@@ -11,13 +11,13 @@ NOISEFILE='../Data/AC1SLICE_1P5MM_NOISE.dat';
 SIGNALFILE='../Data/AC1SLICE_1P5MM.dat';
  
 %instantiate the readingFilter
-N=readRawDataFilter('noise'); %we need to inform the class that it's going tor ead a noise data so it' won't remove the fewquency oversample
+N=readRawDataFilter('noise'); %we need to inform the class that it's going tor read a noise data so it' won't remove the fewquency oversample
 N.setFilename(NOISEFILE); %set the filename
 nReader=N.getOutput(); %the ouptut is a rawdata reader class (cm2DRawDataReader)
 
 
 %instantiate the readingFilter
-S=readRawDataFilter('signal'); %we need to inform the class that it's going tor ead a signal data so it will reomve the frequency overesampling
+S=readRawDataFilter('signal'); %we need to inform the class that it's going tor read a signal data so it will reomve the frequency overesampling
 S.setFilename(SIGNALFILE); %set the filename
 sReader=S.getOutput(); %the ouptut is a rawdata reader class (cm2DRawDataReader)
 
