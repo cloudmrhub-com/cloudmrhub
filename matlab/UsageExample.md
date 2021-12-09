@@ -61,7 +61,7 @@ Calculate the SNR as multiple replicas
 
 ```
 %inpput data
-% thereplicas is a stck of 2D siingle sliced images
+% thereplicas is a stack of 2D siingle sliced images
 
 MR=cm2DSignalToNoiseRatioMultipleReplicas(thereplicas);
 MR.getOutput()
@@ -77,7 +77,7 @@ S= single slice 3D matrix of size #frequencyencoding, #phaseencoding, #coils
 N= noise 3D matrix of size #frequencyencoding, #phaseencoding, #coils
 
 %create a reconstructor
-RE= cm2DKellmanB1(S,NC);
+RE= cm2DReconB1(S,NC);
 RE.setCoilSensitivityMatrixSource(S);
 RE.setCoilSensitivityMatrixCalculationMethod('simplesense');
 
@@ -90,3 +90,5 @@ PMR.setNumberOfPseudoReplicas(100);
 SNR=PMR.getOutput();
 
 ```
+
+Check more example in the directory "Example"
