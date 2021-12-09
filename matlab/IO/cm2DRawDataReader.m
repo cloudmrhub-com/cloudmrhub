@@ -155,7 +155,7 @@ classdef cm2DRawDataReader<cmOutput
         end
         
         function o=getKSpaceNoiseSlice(this,a,c,r,s)
-            
+            % average, contrast,repetitions,slice
           
             if (strcmp(a,'avg') || (a==0) || this.AverageRawDataNoiseKSpaceFlag())
                X=this.averageKS(this.getRawDataNoiseKSpace());
@@ -221,9 +221,21 @@ classdef cm2DRawDataReader<cmOutput
         end
         
         
+        
+                function o=getNumberRepetitions(this)
+            %it uses the 7D kspace reppresentation 3 is the repetitions
+            o=this.getNumberRepetition();
+                end
+                
+                
                 function o=getNumberCoils(this)
             %it uses the 7D kspace reppresentation 3 is the repetitions
             o=this.getNCoil(this.getRawDataImageKSpace());
+                end
+        
+          function o=getNumberAverages(this)
+            %it uses the 7D kspace reppresentation 3 is the repetitions
+            o=this.getNAverages(this.getRawDataImageKSpace());
         end
         
     
