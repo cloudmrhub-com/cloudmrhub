@@ -35,7 +35,7 @@ classdef cm2DRecon<cmOutput
         function this = cm2DRecon()
             %the class expects a 3D matrix composed by a tile of 2D kspaces (fxpxncoils) of a signal and a
             %noise covariance matrix.
-            %is a third element is given that's the prewhitened signal
+            %if a third element is given that's the prewhitened signal
             %kspace
 %             log=[];
 %             if nargin>0
