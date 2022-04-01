@@ -1,3 +1,4 @@
+from xml.dom.expatbuilder import FilterVisibilityController
 from myPy import im
 import SimpleITK as sitk
 import json
@@ -25,13 +26,19 @@ def writeResultsAsCmJSONOutput(results,filename,info=None):
     IMAGES=[]
     for r in results:
         if r['type']=='imaginable2D':
-            if ((isinstance(r['imaginable'],im.Imaginable)) |(isinstance(r['imaginable'],Tess.TessMap))):
+            if ((isinstance(r['imaginable'],im.Imaginable))):
                 theim=r['imaginable']
             elif isinstance(r['imaginable'],sitk.Image):
                 theim=im.Imaginable()
                 theim.setImage(r['imaginable'])
             else:
-                pass
+                try:
+                    if r['imaginable'].isImaginable():
+                        theim=r['imaginable']
+                    else:
+                        return False
+                except:
+                    return False
 
 
             
@@ -86,7 +93,7 @@ def writeResultsAsCmJSONOutput(results,filename,info=None):
         js = json.dumps(OUTPUT)
 
         # open file for writing, "w" 
-        f = open(js,"w")
+        f = open(filename,"w")
 
         # write json object to file
         f.write(js)
