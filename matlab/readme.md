@@ -186,6 +186,10 @@ reconstruct in snr units as rss fully sampled kspace
 -   getOutput()
 
 
+# Requirements
+- matlab 2019x
+- 4GB RAM
+
 # Tests
 against Riccardo's code
 - [x] Recon Grappa 
