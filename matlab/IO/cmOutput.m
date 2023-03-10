@@ -251,8 +251,8 @@ classdef cmOutput<handle
         function [O]=getImagsesFromJsonResultFile(file)
             %from the json results file get the entire image
             %set in a struct variable
-            data=CLOUDMROutput.getJsonResultFromJsonFile(file);
-            O=CLOUDMROutput.getImagesFromResuls(data);
+            data=cmOutput.getJsonResultFromJsonFile(file);
+            O=cmOutput.getImagesFromResuls(data);
         end
         
         function [O] =getImagesFromResuls(data)
