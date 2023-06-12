@@ -18,4 +18,4 @@ for idim = dim,
     tmp = ifft(tmp,[],idim);
 end
 
-output = fftshift(tmp);
+output = ifftshift(tmp);

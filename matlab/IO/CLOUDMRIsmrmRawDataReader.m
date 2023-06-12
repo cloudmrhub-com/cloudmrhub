@@ -1,4 +1,4 @@
-classdef CLOUDMRIsmrmRawDataReader<CLOUDMRRD
+classdef CLOUDMRIsmrmRawDataReader<cmOutput
     
     properties
         Dset %H5 dataset
@@ -9,7 +9,7 @@ classdef CLOUDMRIsmrmRawDataReader<CLOUDMRRD
     end
     
     methods
-        function this = CLOUDMRSiemensRawDataReader(f)
+        function this = CLOUDMRIsmrmRawDataReader(f)
             %data are collected and if data is a structure the possible
             %(image) (noise) and refscan will have is own hdr
                    
