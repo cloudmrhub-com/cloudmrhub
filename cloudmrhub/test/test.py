@@ -5,8 +5,8 @@ import twixtools
 import numpy as np
 import matplotlib.pyplot as plt
 
-s='../data/meas_MID00024_FID188178_Multislice.dat'
-n='../data/meas_MID00027_FID188181_Multislice_no_RF.dat'
+s='cloudmrhub/data/meas_MID00024_FID188178_Multislice.dat'
+n='cloudmrhub/data/meas_MID00027_FID188181_Multislice_no_RF.dat'
 
 twix=twixtools.map_twix(s)
 im_array = twix[0]['image']
@@ -26,7 +26,6 @@ N=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
 # N=N[0:2,0:3,0:4]
 # S=S[0:2,0:3,0:4]
 
-import cm
 
 
 L=cm2DReconRSS()
@@ -38,10 +37,14 @@ print(NBW)
 nc2=L.getNoiseCovariance()
 plt.figure()
 plt.imshow(np.abs(nc2))
+plt.colorbar()
+plt.title('Noise Covariance Matrix')
 plt.show()
 p=L.getPrewhitenedSignal()
 plt.figure()
 plt.imshow(np.abs(p[:,:,0]))
+plt.colorbar()
+plt.title('Prewhitened Kspace First Coil')
 plt.show()
 
 
@@ -51,6 +54,8 @@ im=L.getOutput()
 import matplotlib.pyplot as plt
 
 plt.imshow(im)
+plt.colorbar()
+plt.title('RSS Recon')
 plt.show()
 
 L=cm2DKellmanRSS()
@@ -60,5 +65,7 @@ snr=L.getOutput()
 
 
 plt.imshow(snr)
+plt.colorbar()
+plt.title('RSS SNR')
 plt.show()
 
