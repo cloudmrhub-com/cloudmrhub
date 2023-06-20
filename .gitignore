@@ -2,3 +2,5 @@
 *.mhd
 *~
 *pyc
+cloudmrhub/CMRO/
+docs/

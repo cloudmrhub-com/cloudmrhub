@@ -15,24 +15,17 @@ classdef cm2DReconWithSensitivity<cm2DRecon
         MaskCoilSensitivityMatrix=true
         
     end
-    
     methods%(Access=protected)
         function this=cm2DReconWithSensitivity()
             this.setHasAcceleration(0);
             this.setHasSensitivity(1);
         end
-        
-        
         function coilsens_set=getCoilSensitivityMatrixForFullySampledKSpaceEspirit(this)
             %in this case sens_matrix is the full image
             coilsens_set = espirit_sensitivitymap(this.getCoilSensitivityMatrixSourcePrewhitened());
             this.logIt(['sensitivity map calculated as espirit'],'ok');
             
         end
-        
-        
-        
-        
         function coilsens_set=getCoilSensitivityMatrixForFullySampledKSpaceSimpleSense(this)
             %in this case sens_matrix is the full image
             nc=this.getSignalNCoils;
@@ -40,7 +33,6 @@ classdef cm2DReconWithSensitivity<cm2DRecon
             ref_img = sqrt(sum(abs(sensmap_temp).^2,3));
             coilsens_set = sensmap_temp./repmat(ref_img,[1 1 nc]);
             if(this.getMaskCoilSensitivityMatrix())
-                
             sensmask = ref_img>mean(ref_img(:));
             sensmaskrep = repmat(sensmask,[1 1 nc]);
             coilsens_set = coilsens_set.*sensmaskrep;
@@ -50,23 +42,14 @@ classdef cm2DReconWithSensitivity<cm2DRecon
             this.logIt(['sensitivity map calculated as simplesense'],'ok');
             
         end
-        
-        
-        
-        
         function coilsens_set=getCoilSensitivityMatrixForFullySampledKSpaceAdapt2D(this)
             %check if it must be prewhitened
-            
             recon=cm2DReconAdapt();
             recon.setPrewhitenedSignal(this.getCoilSensitivityMatrixSourcePrewhitened());
             coilsens_set  = recon.getOutputSensitivityMap();
             this.logIt(['sensitivity map calculated as adaptive'],'ok');
             %[~,coilsens_set] = adapt_array_2d(MRifft(this.getCoilSensitivityMatrixPrewhitened(),[1,2]),eye(nv));
         end
-        
-        
-        
-        
         function coilsens_set=getCoilSensitivityMatrixForFullySampledKSpaceBodyCoil(this)
             %not prewhitened because the number of coils do not match the
             %signal usually 2 coils
@@ -89,9 +72,6 @@ classdef cm2DReconWithSensitivity<cm2DRecon
                     %in this case 1th kspace of the bodycoil
                     coilsens_set = reference_image./repmat(sens_matrix(:,:,1),[1 1 nchan]);
             end
-            
-            
-            
             %                             coilsens_set(coilsens_set>1)=1;
             this.logIt(['sensitivity map calculated as BodyCoil'],'ok');
             
@@ -103,17 +83,7 @@ classdef cm2DReconWithSensitivity<cm2DRecon
                     coilsens_set(na,nb,:)= (V-PMin)./PMax;
                 end
             end
-            
-            
-            
-            
-            
         end
-        
-        
-        
-        
-        
         function coilsens_set=calculateCoilSensitivityMatrixFullySampled(this)
             
             %                                   if (~isempty(this.CoilSensitivityMatrixSourcePrewhitened))
@@ -131,13 +101,8 @@ classdef cm2DReconWithSensitivity<cm2DRecon
                 case 'bodycoil'
                     this.logIt(['sensitivity map calculated as aspative'],'?');
                     coilsens_set = getCoilSensitivityMatrixForFullySampledKSpaceBodyCoil();
-                    %                         otherwise
-                    %                             this.logIt(['sensitivity ' lower(this.CoilSensitivityMatrixCalculationMethod)  ' calculation method not set '],'ko');
-                    %                             this.errorMessage();
-                    %                             return
             end
         end
-        
         %                   end
         
         %this function should be overrided on othe
@@ -149,67 +114,39 @@ classdef cm2DReconWithSensitivity<cm2DRecon
             coilsens_set=this.calculateCoilSensitivityMatrixFullySampled();
             
         end
-        
-        
-        
     end
-    
     methods
-        
         function setCoilSensitivityMatrix(this,S)
             this.CoilSensitivityMatrix=S;
         end
-        
         function resetCoilSensitivityMatrix(this)
             this.setSensitivityMatrix([]);
         end
-        
         function coilsens_set=getCoilSensitivityMatrix(this)
             %the sensitivity matrix source is fully sampled!!
-            
             this.logIt(['sensitivity has been requested'],'ok');
-            
             if (isempty(this.CoilSensitivityMatrix)) %we don't have a coil sensitivity matrix
-                
                 this.logIt(['Coil sensitivity map has never been calculated'],'ok');
-                
                 coilsens_set=this.calculateCoilSensitivityMatrix();
-                
                 if (this.getCoilSensitivityMatrixSourceSmooth())
                     for aa=1:size(coilsens_set,3)
                         coilsens_set(:,:,aa)=medfilt2(real(coilsens_set(:,:,aa)),[3 3],'symmetric')+1i*medfilt2(imag(coilsens_set(:,:,aa)),[3 3],'symmetric');
                     end
                     
                 end
-                
                 this.CoilSensitivityMatrix=coilsens_set;
-                
                 this.logIt(['start sensitivity map export'],'ok');
-                
-                
             else
-                
-                
-                
                 coilsens_set=this.CoilSensitivityMatrix;
                 
             end
         end
-        
-        
-        
-        
-        
-        
-        
-        
         function setCoilSensitivityMatrixSourcePrewhitened(this,x)
             this.CoilSensitivityMatrixSourcePrewhitened=x;
             if isempty(this.getCoilSensitivityMatrixSourceNCoils())
                 this.setCoilSensitivityMatrixSourceNCoils(size(x,3));
             end
         end
-        
         function pw_S=getCoilSensitivityMatrixSourcePrewhitened(this)
             this.logIt('is there a prewhitened Source Sensitivity Matrix?','?')
             if(isempty(this.CoilSensitivityMatrixSourcePrewhitened))
@@ -239,9 +176,6 @@ classdef cm2DReconWithSensitivity<cm2DRecon
             end
             
         end
-        
-        
-        
         function setCoilSensitivityMatrixSource(this,IM)
             %expect a 2D coil sens map
             this.CoilSensitivityMatrixSource=IM;
@@ -272,11 +206,6 @@ classdef cm2DReconWithSensitivity<cm2DRecon
         function x=getCoilSensitivityMatrixCalculationMethod(this)
             x=this.CoilSensitivityMatrixCalculationMethod;
         end
-        
-        
-        
-        
-        
         function o=getCoilSensitivityMatrixSourceNCoils(this)
             o=this.CoilSensitivityMatrixSourceNCoils();
         end
@@ -294,19 +223,6 @@ classdef cm2DReconWithSensitivity<cm2DRecon
         function o=getCoilSensitivityMatrixSourceSmooth(this)
             o=this.CoilSensitivityMatrixSourceSmooth;
         end
-        
-        
-        %        function setWithSensitivity(this,S)
-        %             this.WithSensitivity=S;
-        %         end
-        %
-        %         function o=getWithSensitivity(this)
-        %             o=this.WithSensitivity;
-        %         end
-        
-        
-        
-        
         function o=testSensitivityMatrixvalidity(this)
             ss= size(this.getCoilSensitivityMatrixPrewhitened());
             is= size(this.getPrewhitenedSignal());
@@ -319,31 +235,7 @@ classdef cm2DReconWithSensitivity<cm2DRecon
                 this.logIt('sensitivity is not valid (size differencies)','ok')
                 
             end
-            
-            
-            
         end
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     end
 end
 

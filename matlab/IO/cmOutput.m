@@ -223,14 +223,14 @@ classdef cmOutput<handle
         end
         
      
-               function noise_coeff=calculateNoiseCoefficientsMatrix(noisecov)
-            noise_coeff=zeros(size(noisecov));
-            for itemp = 1:size(noisecov,1)
-                for jtemp = 1:size(noisecov,1)
-                    noise_coeff(itemp,jtemp) = noisecov(itemp,jtemp)/sqrt(noisecov(itemp,itemp)*noisecov(jtemp,jtemp));
-                end
-            end
-        end
+%                function noise_coeff=calculateNoiseCoefficientsMatrix(noisecov)
+%             noise_coeff=zeros(size(noisecov));
+%             for itemp = 1:size(noisecov,1)
+%                 for jtemp = 1:size(noisecov,1)
+%                     noise_coeff(itemp,jtemp) = noisecov(itemp,jtemp)/sqrt(noisecov(itemp,itemp)*noisecov(jtemp,jtemp));
+%                 end
+%             end
+%         end
         
         function o=rescale01(bla)
             MI=min(bla(:));

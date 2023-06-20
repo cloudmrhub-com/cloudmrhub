@@ -132,9 +132,9 @@ classdef cm2DRecon<cmOutput
         
         
         
-        function[h]=plotTheReconstruciton(this)
+        function[h]=plotTheReconstruction(this)
             A=this.getOutput();
-            imshow(abs(A),[]);
+            h=imshow(abs(A),[]);
         end
         
         

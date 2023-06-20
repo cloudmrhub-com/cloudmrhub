@@ -1,17 +1,7 @@
 classdef cm2DKellmanB1<cm2DReconB1
-    
-    
     properties
-        
     end
-    
     methods
-        
-        
-        
-        
-        
-        
             function SNR=getOutput(this)
             %this method works on 2d images only
 
