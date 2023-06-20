@@ -1,9 +1,12 @@
 import numpy as np
-import cm
+try:
+    import cm
+except:
+    import cloudmrhub.cm as cm
+    
 import matplotlib.pyplot as plt
 import scipy
 
-import cm
 
 class cm2DRecon(cm.cmOutput):
     """
