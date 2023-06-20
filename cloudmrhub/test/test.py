@@ -1,5 +1,7 @@
 from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS
-import raider.twixtools
+import cloudmrhub.cm as cm
+
+import twixtools
 import numpy as np
 import matplotlib.pyplot as plt
 
