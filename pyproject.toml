@@ -19,7 +19,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["matplolib","scipy","Pillow","sphinx", "sphinx_rtd_theme","raider @ git+https://github.com/erosmontin/raider.git","pynico @ git+https://github.com/erosmontin/pynico.git"]
+dependencies = ["matplolib","scipy","Pillow","sphinx", "sphinx_rtd_theme","raider_eros_montin @ git+https://github.com/erosmontin/raider.git","pynico_eros_montin @ git+https://github.com/erosmontin/pynico.git"]
 
 [project.urls]
 "Homepage" = "https://github.com/erosmontin/cmrocode"

@@ -1,10 +1,10 @@
-from cm2D import cm2DKellmanRSS, cm2DReconRSS
-import twixtools
+from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS
+import raider.twixtools
 import numpy as np
 import matplotlib.pyplot as plt
-import cm
-s='data/meas_MID00024_FID188178_Multislice.dat'
-n='data/meas_MID00027_FID188181_Multislice_no_RF.dat'
+
+s='../data/meas_MID00024_FID188178_Multislice.dat'
+n='../data/meas_MID00027_FID188181_Multislice_no_RF.dat'
 
 twix=twixtools.map_twix(s)
 im_array = twix[0]['image']
