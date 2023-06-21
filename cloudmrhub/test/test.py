@@ -38,14 +38,12 @@ nc2=L.getNoiseCovariance()
 plt.figure()
 plt.imshow(np.abs(nc2))
 plt.colorbar()
-plt.title('Noise Covariance Matrix')
-plt.show()
+plt.title(f'Noise Covariance Matrix BW:{NBW:03f}')
 p=L.getPrewhitenedSignal()
 plt.figure()
 plt.imshow(np.abs(p[:,:,0]))
 plt.colorbar()
 plt.title('Prewhitened Kspace First Coil')
-plt.show()
 
 
 
@@ -56,7 +54,6 @@ import matplotlib.pyplot as plt
 plt.imshow(im)
 plt.colorbar()
 plt.title('RSS Recon')
-plt.show()
 
 L=cm2DKellmanRSS()
 L.setSignalKSpace(S)
@@ -67,7 +64,6 @@ snr=L.getOutput()
 plt.imshow(snr)
 plt.colorbar()
 plt.title('RSS SNR')
-plt.show()
 
 
 
@@ -76,17 +72,15 @@ L.setSignalKSpace(S)
 L.setNoiseKSpace(N)
 L.setCoilSensitivityMatrixSource(S)
 L.setCoilSensitivityMatrixCalculationMethod('inner')
-for t in range(4):
-    print(t)
-    plt.subplot(2,2,t+1)
+for t in range(S.shape[-1]):
+    NN=np.sqrt(S.shape[-1])
+    plt.subplot(int(NN),int(NN),t+1)
     plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
-
-
-
+    plt.title(f'Coil {t}')
 
 plt.figure()
 plt.imshow(L.getOutput())
-
+plt.title('B1 Recon')
 
 L=cm2DKellmanB1()
 L.setSignalKSpace(S)
