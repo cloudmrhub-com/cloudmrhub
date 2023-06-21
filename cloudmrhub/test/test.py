@@ -1,4 +1,4 @@
-from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS
+from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS, cm2DKellmanB1,cm2DReconB1
 import cloudmrhub.cm as cm
 
 import twixtools
@@ -69,3 +69,36 @@ plt.colorbar()
 plt.title('RSS SNR')
 plt.show()
 
+
+
+L=cm2DReconB1()
+L.setSignalKSpace(S)
+L.setNoiseKSpace(N)
+L.setCoilSensitivityMatrixSource(S)
+L.setCoilSensitivityMatrixCalculationMethod('inner')
+for t in range(4):
+    print(t)
+    plt.subplot(2,2,t+1)
+    plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
+
+
+
+
+plt.figure()
+plt.imshow(L.getOutput())
+
+
+L=cm2DKellmanB1()
+L.setSignalKSpace(S)
+L.setNoiseKSpace(N)
+L.setCoilSensitivityMatrixSource(S)
+L.setCoilSensitivityMatrixCalculationMethod('inner')
+plt.figure()
+plt.imshow(L.getOutput())
+plt.colorbar()
+plt.title('SNR B1')
+
+
+
+
+plt.show()
