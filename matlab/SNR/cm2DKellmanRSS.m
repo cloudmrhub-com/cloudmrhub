@@ -1,18 +1,7 @@
 classdef cm2DKellmanRSS<cm2DReconRSS
-    
     properties
-        
     end
-    
     methods
-        
-        
-
-        
-        
-        
-        
-        
                function SNR=getOutput(this)
                [SS]=this.getSignalSize();
                nf=SS(1);
@@ -29,12 +18,7 @@ classdef cm2DKellmanRSS<cm2DReconRSS
                  end
             
         end
-        
-        
-        
-        
     end
-      
 end
 
 

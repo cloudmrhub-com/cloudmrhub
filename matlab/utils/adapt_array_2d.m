@@ -46,7 +46,7 @@ for y=st:st:ny
     ly1=length(ymin1:ymax1);
     lx1=length(xmin1:xmax1);
    
-%     fprintf(1,'%d %d %d %d\n',xmin1,xmax1,ymin1,ymax1);
+    fprintf(1,'%d %d %d %d\n',xmin1,xmax1,ymin1,ymax1);
     
     m1=reshape(yn(:,ymin1:ymax1,xmin1:xmax1),nc,lx1*ly1);
       

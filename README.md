@@ -7,7 +7,7 @@ pip install git+https://github.com/cloudmrhub-com/CMRCode.git
 
 ```
 
-# suggestions
+# Suggestions
 ```
 #create an nevironment 
 python3 -m venv CMT
@@ -54,8 +54,44 @@ plt.show()
 
 ```
 
+# Roadmap
+
+[ ] SNR
+    [ ] Kellman
+        [x] RSS v0
+        [ ] B1  v1
+        [ ] Sense v2
+    [ ] Pseudo Multiple Replicas 
+        [ ] RSS v1
+        [ ] B1  v1
+        [ ] Sense v2
+        [ ] Grappa v2
+        [ ] Adapt v2
+
+    [ ] Pseudo Multiple Replicas Wien
+        [ ] RSS v1
+        [ ] B1 v1
+        [ ] Sense v2
+        [ ] Grappa v2
+        [ ] Adapt v2
+
+[ ] Recon
+    [x] RSS v0
+    [ ] B1 v1
+    [ ] Sense v2
+    [ ] Adapt v1
+
+
+
+- v1:
+    - recon RSS,B1
+    - SNR Kellman, RSS,B1
+    - SNR Pseudo MR  RSS,B1
+- v0
+    - recon RSS
 
 # Cite Us
+
 - Montin E, Lattanzi R. Seeking a Widely Adoptable Practical Standard to Estimate Signal-to-Noise Ratio in Magnetic Resonance Imaging for Multiple-Coil Reconstructions. J Magn Reson Imaging. 2021 Dec;54(6):1952-1964. doi: 10.1002/jmri.27816. Epub 2021 Jul 4. PMID: 34219312; PMCID: PMC8633048.
 
 

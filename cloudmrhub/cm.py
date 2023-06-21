@@ -2,8 +2,11 @@ import twixtools
 import json
 from pynico_eros_montin import pynico as pn
 import numpy as np
-
+import scipy
 class k2d:
+    """
+    A 2d Kspace class to use in CloudMR
+    """
     def __init__(self,k=None):
         self.k=np.array([])
         if k is not None:
@@ -17,7 +20,9 @@ class k2d:
     def set(self,k):
         self.k =k
     def isEmpty(self):
-        return np.sum(self.k.shape)>0
+        return not np.sum(self.k.shape)>0
+    def reset(self):
+        self.k=np.array([])
 
     
         
@@ -236,6 +241,31 @@ def MRfft(k,dim):
         tmp = np.fft.fft(tmp, axis=idim)
     output = np.fft.ifftshift(tmp)
     return output
+
+def calculate_simple_sense_sensitivitymaps(K,mask=None):
+    """Calculates the coil sensitivity maps using the simple SENSE method.
+
+    Args:
+        K: freq,phase,coil numpy array of the kspace 
+
+    Returns:
+        The coil sensitivity matrix.
+    """
+    dims=K.shape
+    sensmap_temp = MRifft(K,[0,1])
+    ref_img = np.sqrt(np.sum(np.abs(sensmap_temp)**2, axis=-1))
+    coilsens_set = sensmap_temp / np.tile(np.expand_dims(ref_img,axis=-1), [1, 1, dims[2]])
+    if mask:
+        if isinstance(mask,str):
+            if mask.lower()=='ref':
+                sensmask = ref_img > np.mean(ref_img)        
+        elif isinstance(mask,np.ndarray):
+            sensmask = ref_img > np.mean(ref_img)
+        if len(sensmask.shape)==2:            
+            sensmaskrep = np.tile(np.expand_dims(sensmask,axis=-1), [1, 1, dims[2]])
+        coilsens_set = coilsens_set * sensmaskrep
+    return coilsens_set
+
 
 
     
