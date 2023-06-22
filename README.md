@@ -61,30 +61,35 @@ plt.show()
         [x] RSS v0
         [x] B1  v1
         [ ] Sense v2
+
     [ ] Pseudo Multiple Replicas 
-        [ ] RSS v1
+        [x] RSS v1
         [ ] B1  v1
         [ ] Sense v2
         [ ] Grappa v2
         [ ] Adapt v3
 
     [ ] Pseudo Multiple Replicas Wien
-        [ ] RSS v1
+        [x] RSS v1
         [ ] B1 v1
         [ ] Sense v2
         [ ] Grappa v2
         [ ] Adapt v3
+        [ ] CompressSenseBart v4
 
 [ ] Recon
     [x] RSS v0
     [x] B1 v1
     [ ] Sense v2
+    [ ] Grappa
     [ ] Adapt v3
+    [ ] Compress Sense Bart v4
 
 [ ] Coilsensitivity Maps:
     [x] Inner v1
     [ ] Adapt v3
-    [ ] BodyCoil v2
+    [ ] BodyCoil v3
+    [ ] Espirit
     
 
 

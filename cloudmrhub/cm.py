@@ -3,9 +3,9 @@ import json
 from pynico_eros_montin import pynico as pn
 import numpy as np
 import scipy
-class k2d:
+class i2d:
     """
-    A 2d Kspace class to use in CloudMR
+    A 2d image class to use in CloudMR
     """
     def __init__(self,k=None):
         self.k=np.array([])
@@ -13,8 +13,6 @@ class k2d:
             self.set(k)
     def getSize(self):
         return self.k.shape[0:2]
-    def getNCoils(self):
-        return self.k.shape[-1]
     def get(self):
         return self.k
     def set(self,k):
@@ -24,7 +22,28 @@ class k2d:
     def reset(self):
         self.k=np.array([])
 
+class i3d(i2d):
+    def __init__(self, k=None):
+        super().__init__(k)
+    def getnumberOfImages(self):
+        return self.k.shape[-1]
     
+
+
+class k2d(i2d):
+    """
+    A 2d Kspace class to use in CloudMR
+    """
+    def __init__(self, k=None):
+        super().__init__(k)
+    def getNCoils(self):
+        return self.k.shape[-1]
+    
+class sk2d(i2d):
+    def __init__(self, k=None):
+        super().__init__(k)
+    def getnumberOfImages(self):
+        return self.k.shape[-1]
         
         
 class cmOutput:
@@ -33,8 +52,8 @@ class cmOutput:
         self.Log = pn.Log(message)
         self.Type = "general"
         self.SubType = "zero"
-        self.OUTPUTLOGFILENAME = pn.Pathale()
-        self.OUTPUTFILENAME = pn.Pathale()
+        self.OUTPUTLOGFILENAME = None
+        self.OUTPUTFILENAME = None
 
     def addToExporter(self, type, name, value):
         self.Exporter.append([type, name, float(value)])
@@ -63,11 +82,10 @@ class cmOutput:
     def getTypeOutput(self):
         return self.Type
 
-    def appendLog(self, L):
-        self.Log.append(L)
+    def appendLog(self, L,t=None):
+        self.logIt(L,t)
 
     def logIt(self, W, t=None):
-        
         self.Log.append(W,t)
 
     def getResults(self):
@@ -187,7 +205,9 @@ def get_pseudo_noise(msize, corr_noise_factor):
     gaussian_whitenoise = np.reshape(gaussian_whitenoise.T, (nrow, ncol, nchan))
 
     return gaussian_whitenoise
-
+def get_correlation_factor(correlation_matrix):
+    D,V = np.linalg.eigh(correlation_matrix, UPLO='U')
+    return V @ np.sqrt(np.diag(D)) @ np.linalg.inv(V)  # 1 i
 def create_fake_noise_kspace_data(shape, correlation_matrix=None):
     """Creates a fake noise matrix with some correlations between the channels.
 
@@ -200,8 +220,7 @@ def create_fake_noise_kspace_data(shape, correlation_matrix=None):
     """
     if correlation_matrix is None:
         correlation_matrix=np.eye(len(shape))
-    D,V = np.linalg.eigh(correlation_matrix, UPLO='U')
-    corr_noise_factor = V * np.sqrt(np.diag(D)) * np.linalg.inv(V)  # 1 i
+    corr_noise_factor=get_correlation_factor(correlation_matrix)
     return get_pseudo_noise(shape, corr_noise_factor)
 
 
@@ -266,7 +285,32 @@ def calculate_simple_sense_sensitivitymaps(K,mask=None):
         coilsens_set = coilsens_set * sensmaskrep
     return coilsens_set
 
+def get_wien_noise_image(noiseonly, box):
+    """
+    Calculates the Wiener noise image from the noiseonly image.
 
+    Args:
+        noiseonly: The noiseonly image.
+        box: The size of the box.
+
+    Returns:
+        The Wiener noise image.
+    """
+    NC, NR = noiseonly.shape
+    kx = box
+    ky = box
+    NOISE = np.zeros((NC, NR))
+    NOISE.fill(np.nan)
+    PADDEDNOISE = np.pad(noiseonly, [(kx, kx), (ky, ky)], 'constant', constant_values=np.nan)
+    for ic in range(NC):
+        for ir in range(NR):
+            pic = kx + ic + np.arange(-kx, kx + 1)
+            pir = ky + ir + np.arange(-ky, ky + 1)
+            try:
+                NOISE[ic, ir] = np.nanstd(PADDEDNOISE[np.min(pic):np.max(pic)+1,np.min(pir):np.max(pir)+1],ddof=1)
+            except:
+                pass
+    return NOISE
 
     
 def writeResultsAsCmJSONOutput(results,filename,info=None):

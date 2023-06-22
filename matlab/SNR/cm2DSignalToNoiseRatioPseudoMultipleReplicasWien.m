@@ -8,8 +8,7 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicasWien<cm2DSignalToNoiseRatio
     end
     
     
-    
-    
+        
     
     methods
         function this = cm2DSignalToNoiseRatioPseudoMultipleReplicasWien(Recon,x)

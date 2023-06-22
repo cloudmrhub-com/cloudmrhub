@@ -1,25 +1,18 @@
 classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMultipleReplicas
     %main class of array combining methods, the constructor is ovewritten by
     %the class constructor
-    
     properties
         Reconstructor
         NumberOfPseudoReplicas
         ReferenceImage
     end
-    
-    
-    
-    
-    
     methods
         function this = cm2DSignalToNoiseRatioPseudoMultipleReplicas(Recon,x)
             %the class expects a 3D matrix composed by a tile of 2D images
             %or nothing
             this.Type='PMR';
-            
             if nargin>0
-                 this.setReconstructor(Recon)
+                this.setReconstructor(Recon)
             end
             
             if nargin>1
@@ -27,20 +20,10 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
             end
             
         end
-        
-        
         function setReconstructor(this,R)
             this.Reconstructor=R;
         end
-        
-        
-                
-           
-        
-        
-        
-        
-         function setNumberOfPseudoReplicas(this,f)
+        function setNumberOfPseudoReplicas(this,f)
             
             this.NumberOfPseudoReplicas=f;
         end
@@ -48,34 +31,25 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
         function o =getNumberOfPseudoReplicas(this)
             o = this.NumberOfPseudoReplicas;
         end
-        
-        
-        
         function setNoiseKSpace(this,f)
             % 2DKspace
             this.Reconstructor.setNoiseKSpace(f);
         end
-        
         function o =getNoiseKSpace(this)
             % 2DKspace
             o = this.Reconstructor.getNoiseKSpace();
         end
-        
-        
         function setSignalKSpace(this,f)
             %2Dkspace
             this.Reconstructor.setSignalKSpace(f);
-            
         end
-        
         function o=getSignalKSpace(this)
             o=this.Reconstructor.getSignalKSpace();
         end
-        
-        
         function o=getNoiseCovariance(this)
             o= this.Reconstructor.getNoiseCovariance();
         end
+        
         
         
         function o=getReferenceImage(this)
@@ -87,40 +61,40 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
             this.ReferenceImage=ref;
         end
         
-           function [SNR,noise]=getOutput(this)
+        function [SNR,noise]=getOutput(this)
             [SNR,noise]= this.calculate();
             
-           end
+        end
         
-           function [OUT]=fakesomedata(this,NR)
-                 %NR=this.getNumberOfPseudoReplicas();
-                    %this method works on 2d images only
-                        OUT=[];
-                    noisecov=this.getNoiseCovariance();
-                    %riccardo lattanzi
-                    [V,D] = eig(noisecov);
-                    corr_noise_factor = V*sqrt(D)*inv(V); %1 i
-                    
-                    %calculate the sensitivity maps once.
-                       K=this.Reconstructor.getSignalKSpace();
-                    
-                   
-                    for r=1:NR
-                        n=this.getPseudoNoise(size(K),corr_noise_factor);
-                        
-                        if(this.Reconstructor.isAccelerated)
-                            n=n.*(K~=0); %also the noise is accelerated:)
-                        end
-                        
-                        OUT=cat(4,OUT,n+K);
-                    end
-                    
-                    %get back th old kspace
-                    this.Reconstructor.setSignalKSpace(K);
+        function [OUT]=fakesomedata(this,NR)
+            %NR=this.getNumberOfPseudoReplicas();
+            %this method works on 2d images only
+            OUT=[];
+            noisecov=this.getNoiseCovariance();
+            %riccardo lattanzi
+            [V,D] = eig(noisecov);
+            corr_noise_factor = V*sqrt(D)*inv(V); %1 i
+            
+            %calculate the sensitivity maps once.
+            K=this.Reconstructor.getSignalKSpace();
+            
+            
+            for r=1:NR
+                n=this.getPseudoNoise(size(K),corr_noise_factor);
                 
+                if(this.Reconstructor.isAccelerated)
+                    n=n.*(K~=0); %also the noise is accelerated:)
                 end
-               
-           
+                
+                OUT=cat(4,OUT,n+K);
+            end
+            
+            %get back th old kspace
+            this.Reconstructor.setSignalKSpace(K);
+            
+        end
+        
+        
         function [o, o2]=calculate(this)
             
             
@@ -128,8 +102,8 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
                 %using the imageArray
                 this.logIt('SNR PMr caclulated with image Array, considering the first replica the  reference','ok');
                 
-%in this case the reference image must be set otside the class or is taken
-%the mean of the stack
+                %in this case the reference image must be set otside the class or is taken
+                %the mean of the stack
                 
             else
                 
@@ -147,14 +121,14 @@ classdef cm2DSignalToNoiseRatioPseudoMultipleReplicas<cm2DSignalToNoiseRatioMult
                     
                     
                     if ( this.Reconstructor.needsSensitivity())
-S=this.Reconstructor.getCoilSensitivityMatrix();
-this.Reconstructor.setCoilSensitivityMatrix(S);
+                        S=this.Reconstructor.getCoilSensitivityMatrix();
+                        this.Reconstructor.setCoilSensitivityMatrix(S);
                     end
                     
                     
                     %reconstruct the ref image
                     K=this.Reconstructor.getSignalKSpace();
-                                     
+                    
                     
                     
                     for r=1:NR
@@ -170,63 +144,45 @@ this.Reconstructor.setCoilSensitivityMatrix(S);
                     end
                     
                     %get back the original Kspace
-                     this.Reconstructor.setSignalKSpace(K);
+                    this.Reconstructor.setSignalKSpace(K);
                     
                 catch
                     this.logIt('cannot calculate Pseudo MR','ko');
                     
                 end
             end
-                    
-            
-            
-                    %this.getPseudoMultipleReplicaSignalImage();
-                    %o2=std(Re,0,3);
-                    o2=this.getPseudoMultipleReplicaNoiseImage();
-                    o=this. getPseudoMultipleReplicaSignalImage()./o2;
-                    
-                     this.SNR=o;
-                    %this.add2DImagetoExport
-                    this.add2DImagetoExport(o,'SNR')
-                    this.add2DImagetoExport(o2,'STD')
-
-                    this.logIt('PSEUDO MR calculated','ok');
-                    
-                    
-               
+            o2=this.getPseudoMultipleReplicaNoiseImage();
+            o=this. getPseudoMultipleReplicaSignalImage()./o2;
+            this.SNR=o;
+            this.add2DImagetoExport(o,'SNR')
+            this.add2DImagetoExport(o2,'STD')
+            this.logIt('PSEUDO MR calculated','ok');
         end
-        
         % for pseudomr
-      function pmr_image_noise=getPseudoMultipleReplicaNoiseImage(this)
+        function pmr_image_noise=getPseudoMultipleReplicaNoiseImage(this)
             %std and mean in lattanzi are mean(abs()) and std(abs())
-            
-            
             pmr_image_stack=this.getImageArray();
             pmr_image_noise = std(abs(pmr_image_stack) + max(abs(pmr_image_stack(:))),[],3);
             pmr_image_noise(pmr_image_noise < eps) = 1;
             
         end
         
-      function numerator=getPseudoMultipleReplicaSignalImage(this)
+        function numerator=getPseudoMultipleReplicaSignalImage(this)
             % I can have a reference image
             % i can have a reconstructor
             %i can have a stack of images ()
-            
             numerator=this.getReferenceImage();
-            
             if (isempty(numerator))
                 numerator=abs(this.Reconstructor.getOutput());
                 this.setReferenceImage(numerator);
                 if isempty(numerator)
                     numerator=this.getImageArrayMEAN();
-                   this.setReferenceImage(numerator);
-                   
+                    this.setReferenceImage(numerator);
                     if (isempty(numerator))
                         this.logIt('couldn find a reference image','error')
                         numerator=[];
                     else
-                    this.logIt(['reference image was set from the reconstructor class ' class(this.Reconstructor)],'warning')
-
+                        this.logIt(['reference image was set from the reconstructor class ' class(this.Reconstructor)],'warning')
                     end
                 else
                     this.logIt(['reference image was set from the reconstructor class ' class(this.Reconstructor)],'warning')
@@ -234,18 +190,11 @@ this.Reconstructor.setCoilSensitivityMatrix(S);
             else
                 this.logIt('reference image was set outside the class','warning')
             end
-                
-            
-
-      end
-        
-        
-        
+        end
         %ovverride
         function exportResults(this,fn)
             O.version='CLOUDMR2DACM20190409';
             O.author='eros.montin@gmail.com';
-            
             if isempty(this.Type)
                 
                 O.type='DATA';
@@ -293,21 +242,21 @@ this.Reconstructor.setCoilSensitivityMatrix(S);
     
     
     methods (Static)
-
-         function N=getFakeRawDataNoise(ksize,NC,corr_noise_factor)
-             %ksize (freq,phase,coil)
-                F=cm2DSignalToNoiseRatioPseudoMultipleReplicas();
-                if nargin<3
+        
+        function N=getFakeRawDataNoise(ksize,NC,corr_noise_factor)
+            %ksize (freq,phase,coil)
+            F=cm2DSignalToNoiseRatioPseudoMultipleReplicas();
+            if nargin<3
                 corr_noise_factor=F.getNoiseCorrelationFactor(NC);
-                end
-                N=F.getPseudoNoise(ksize,corr_noise_factor);
-           end
+            end
+            N=F.getPseudoNoise(ksize,corr_noise_factor);
+        end
         
         function corr_noise_factor=getNoiseCorrelationFactor(noisecov)
-                [V,D] = eig(noisecov);
-                    corr_noise_factor = V*sqrt(D)*inv(V); %1 i
-           end
-
+            [V,D] = eig(noisecov);
+            corr_noise_factor = V*sqrt(D)*inv(V); %1 i
+        end
+        
         function gaussian_whitenoise=getPseudoNoise(msize,corr_noise_factor)
             %msize (freq,phase,coil)
             
@@ -349,5 +298,5 @@ this.Reconstructor.setCoilSensitivityMatrix(S);
     end
     
 end
-    
-    
+
+

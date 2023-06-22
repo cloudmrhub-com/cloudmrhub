@@ -58,6 +58,7 @@ class cm2DRecon(cm.cmOutput):
         """
         
         self.SignalKSpace.set(signalKSpace)
+        self.SignalPrewhitened.reset()
 
     def getSignalKSpace(self):
         """
@@ -195,6 +196,8 @@ class cm2DRecon(cm.cmOutput):
     def get2DKSIFFT(self):
         SC=np.sqrt(np.prod(np.array(self.getSignalKSpaceSize())))
         return cm.MRifft(self.getPrewhitenedSignal(),[0,1])*SC
+    def getOutput(self):
+        pass
 
 class cm2DReconRSS(cm2DRecon):
     """
