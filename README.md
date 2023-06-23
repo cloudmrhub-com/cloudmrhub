@@ -190,45 +190,46 @@ plt.colorbar()
 plt.show()
 ```
 # Roadmap
+    [] SNR
+        [] Kellman
+            [x] RSS v0
+            [x] B1  v1
+            [] Sense v2
 
-[ ] SNR
-    [ ] Kellman
+        [ ] Pseudo Multiple Replicas 
+            [x] RSS v1
+            [x] B1  v1
+            [ ] Sense v2
+            [ ] Grappa v2
+            [ ] Adapt v3
+
+        [ ] Pseudo Multiple Replicas Wien
+            [x] RSS v1
+            [x] B1 v1
+            [ ] Sense v2
+            [ ] Grappa v2
+            [ ] Adapt v3
+            [ ] CompressSenseBart v4
+
+    [ ] Recon
+
         [x] RSS v0
-        [x] B1  v1
-        [ ] Sense v2
-
-    [ ] Pseudo Multiple Replicas 
-        [x] RSS v1
-        [ ] B1  v1
+        [x] B1 v1
         [ ] Sense v2
         [ ] Grappa v2
         [ ] Adapt v3
+        [ ] Compress Sense Bart v4
 
-    [ ] Pseudo Multiple Replicas Wien
-        [x] RSS v1
-        [ ] B1 v1
-        [ ] Sense v2
-        [ ] Grappa v2
+    [ ] Coilsensitivity Maps:
+
+        [x] Inner v1
         [ ] Adapt v3
-        [ ] CompressSenseBart v4
-
-[ ] Recon
-    [x] RSS v0
-    [x] B1 v1
-    [ ] Sense v2
-    [ ] Grappa
-    [ ] Adapt v3
-    [ ] Compress Sense Bart v4
-
-[ ] Coilsensitivity Maps:
-    [x] Inner v1
-    [ ] Adapt v3
-    [ ] BodyCoil v3
-    [ ] Espirit
+        [ ] BodyCoil v3
+        [ ] Espirit
     
 
 
-
+- v2: ()
 - v1:
     - recon RSS,B1
     - SNR Kellman, RSS,B1

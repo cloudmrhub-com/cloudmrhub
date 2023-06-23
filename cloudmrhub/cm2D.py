@@ -567,10 +567,17 @@ class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
         self.add2DImage(self.reconstructor.getOutput())
     
     def setReconstructor(self,recon):
+        """We dont' want to recalculate the Sensitivity map at every replica
+
+        Args:
+            recon (cm2dRecon): REconstructor class
+        """
         self.reconstructor=recon
-        self.reconstructor.keepSensitivity=True
         self.reconstructor.resetAfterSignal=MethodType(resetASPMR,self.reconstructor)
         self.reconstructor.resetAfterNoise=MethodType(resetANPMR,self.reconstructor)
+
+    def getReconstructor(self):
+        return self.reconstructor
        
        
     def resetAfterNoise(self,keepsensitivity=False):
