@@ -118,6 +118,77 @@ plt.title('SNR B1')
 
 plt.show()
 ```
+
+
+
+# Example SNR
+```
+import cloudmrhub.cm2D as cm2D
+import twixtools
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+import sys
+s= sys.argv[1]
+n=sys.argv[2]
+
+twix=twixtools.map_twix(s)
+im_array = twix[0]['image']
+im_array.flags['remove_os'] = True  # activate automatic os removal
+im_array.flags['average']['Rep'] = True  # average all repetitions
+im_array.flags['average']['Ave'] = True  # average all repetitions
+S=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
+
+
+twix=twixtools.map_twix(n)
+im_array = twix[0]['image']
+im_array.flags['remove_os'] = False  # activate automatic os removal
+im_array.flags['average']['Rep'] = False  # average all repetitions
+im_array.flags['average']['Ave'] = False # average all repetitions
+N=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
+
+L2=cm2D.cm2DSignalToNoiseRatioPseudoMultipleReplicas()
+L=cm2D.cm2DReconRSS()
+L2.numberOfReplicas=100
+L.setNoiseKSpace(N)
+L.setSignalKSpace(S)
+L2.reconstructor=L
+
+plt.subplot(221)
+plt.imshow(L2.getOutput(),vmax=250)
+plt.title('PMR')
+plt.colorbar()
+
+R2=cm2D.cm2DSignalToNoiseRatioPseudoMultipleReplicasWen()
+R=cm2D.cm2DReconRSS()
+R2.numberOfReplicas=5
+R2.boxSize=10
+R.setNoiseKSpace(N)
+R.setSignalKSpace(S)
+R2.reconstructor=R
+
+
+
+
+
+
+plt.subplot(222)
+plt.imshow(R2.getOutput(),vmax=250)
+plt.title('CR')
+plt.colorbar()
+
+R=cm2D.cm2DKellmanRSS()
+R.setNoiseKSpace(N)
+R.setSignalKSpace(S)
+plt.subplot(223)
+plt.imshow(R.getOutput(),vmax=250)
+plt.title('Kellman')
+plt.colorbar()
+
+
+plt.show()
+```
 # Roadmap
 
 [ ] SNR
