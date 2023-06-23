@@ -6,7 +6,7 @@ except:
     
 import matplotlib.pyplot as plt
 import scipy
-
+from types import MethodType
 
 class cm2DRecon(cm.cmOutput):
     """
@@ -198,6 +198,17 @@ class cm2DRecon(cm.cmOutput):
         return cm.MRifft(self.getPrewhitenedSignal(),[0,1])*SC
     def getOutput(self):
         pass
+    def resetAfterSignal(self):
+        self.SignalPrewhitened.reset()
+    def resetAfterNoise(self):
+        if not isinstance(self.NoiseBandWidth,str):
+            self.NoiseBandWidth=None
+            print('reset the NBW')
+        self.NoiseCovariance = np.array([])
+        self.InverseNoiseCovariance = np.array([])
+        self.SignalPrewhitened.reset()
+
+        
 
 class cm2DReconRSS(cm2DRecon):
     """
@@ -327,7 +338,7 @@ class cm2DReconWithSensitivity(cm2DRecon):
         self.CoilSensitivityMatrix.set(S)
 
     def resetCoilSensitivityMatrix(self):
-        self.setSensitivityMatrix.reset()
+        self.CoilSensitivityMatrix.reset()
 
     def calculateCoilSensitivityMatrix(self):
         if self.CoilSensitivityMatrix.isEmpty():
@@ -382,6 +393,20 @@ class cm2DReconWithSensitivity(cm2DRecon):
 
             self.setCoilSensitivityMatrix(cm.prewhiteningSignal(cm.calculate_simple_sense_sensitivitymaps(s,self.MaskCoilSensitivityMatrix), self.getNoiseCovariance() ))
         return self.CoilSensitivityMatrix.get()
+    
+ 
+    def resetAfterSignal(self):
+        super().resetAfterSignal()
+        self.CoilSensitivityMatrix.reset()        
+
+        
+    def resetAfterNoise(self):
+        super().resetAfterNoise()
+        self.CoilSensitivityMatrix.reset()
+
+    
+
+
 
 
 class cm2DReconB1(cm2DReconWithSensitivity):
@@ -404,6 +429,7 @@ class cm2DReconB1(cm2DReconWithSensitivity):
         super().__init__()
         self.HasAcceleration= False
         self.HasSensitivity=False
+        
     def getOutput(self):
         img_matrix = self.get2DKSIFFT()
         pw_sensmap=self.getCoilSensitivityMatrix()
@@ -477,6 +503,18 @@ class cm2DSignalToNoiseRatio(cm.cmOutput):
         self.Type = "MR"
         self.SubType = ""
 
+
+def resetASPMR(self):
+    self.SignalPrewhitened.reset()
+def resetANPMR(self):
+    if not isinstance(self.NoiseBandWidth,str):
+        self.NoiseBandWidth=None
+        print('reset the NBW')
+    self.NoiseCovariance = np.array([])
+    self.InverseNoiseCovariance = np.array([])
+    self.SignalPrewhitened.reset()
+
+        
     
 
 class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
@@ -490,8 +528,9 @@ class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
         self.STD=None
         self.Max=None
         self.Type = "MR"
-        self.reconstructor=cm2DRecon()
+        self.reconstructor=None
         self.referenceImage=cm.i2d()
+
         
         if x is not None:
             self.add2DStackOfImages(x)
@@ -527,6 +566,17 @@ class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
         self.reconstructor.setSignalKSpace(signal)
         self.add2DImage(self.reconstructor.getOutput())
     
+    def setReconstructor(self,recon):
+        self.reconstructor=recon
+        self.reconstructor.keepSensitivity=True
+        self.reconstructor.resetAfterSignal=MethodType(resetASPMR,self.reconstructor)
+        self.reconstructor.resetAfterNoise=MethodType(resetANPMR,self.reconstructor)
+       
+       
+    def resetAfterNoise(self,keepsensitivity=False):
+        super().resetAfterNoise()
+        if not keepsensitivity:
+            self.setCoilSensitivityMatrix.reset()
 
 
     def getImageArray(self):
