@@ -490,7 +490,7 @@ class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
         self.STD=None
         self.Max=None
         self.Type = "MR"
-        self.reconstructor=cm2D.cm2DRecon()
+        self.reconstructor=cm2DRecon()
         self.referenceImage=cm.i2d()
         
         if x is not None:
