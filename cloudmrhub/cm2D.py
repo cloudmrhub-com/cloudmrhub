@@ -465,3 +465,170 @@ class cm2DKellmanB1(cm2DReconB1):
                             im[irow,icol] = np.divide(num,den)
         return im
     
+
+class cm2DSignalToNoiseRatio(cm.cmOutput):
+    def __init__(self, message=None):
+        super().__init__(message)
+        """
+        the class expects a 3D matrix composed by a tile of 2D numpy images
+        """
+        self.appendLog("SNR Calculation started instantiated", "start")
+        self.SNR = None
+        self.Type = "MR"
+        self.SubType = ""
+
+    
+
+class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
+    def __init__(self,x=None,message=None):
+        """
+        the class expects a 3D matrix composed by a tile of 2D images
+        """
+        super().__init__(message)
+        self.imageArray=cm.i3d()
+        self.Mean=None
+        self.STD=None
+        self.Max=None
+        self.Type = "MR"
+        self.reconstructor=cm2D.cm2DRecon()
+        self.referenceImage=cm.i2d()
+        
+        if x is not None:
+            self.add2DStackOfImages(x)
+    def reset(self):
+        self.Max=None
+        self.Mean=None
+        self.STD=None
+        self.SNR=None
+    def getReferenceImage(self):
+        return self.referenceImage.get()
+    def setReferenceImage(self,x):
+        self.referenceImage.set(x)
+    def add2DImage(self, x):
+        self.reset()
+        """
+        add a 2D image to the class
+        """
+        if len(x.shape)==2:
+            x=np.expand_dims(x,axis=-1)
+        if self.imageArray.isEmpty():
+            self.setImageArray(x)
+        else:
+            self.setImageArray(np.concatenate((self.getImageArray(), x), axis=-1))
+
+    def add2DStackOfImages(self, x):
+        """
+        add a stack of 2D images to the class
+        """
+        self.add2DImage(x)
+        # for t in range(x.shape[2]):
+            # self.add2DImage(x[:, :, t])
+    def add2DKspace(self,signal):        
+        self.reconstructor.setSignalKSpace(signal)
+        self.add2DImage(self.reconstructor.getOutput())
+    
+
+
+    def getImageArray(self):
+        """
+        return the image array
+        """
+        return self.imageArray.get()
+    def setImageArray(self,x):
+        """
+        return the image array
+        """
+        self.imageArray.set(x)
+
+    def getOutput(self):
+        """
+        calculate the mean and standard deviation of the image array
+        """
+        if self.SNR is None:
+            self.SNR = np.divide(self.getImageArrayMean(), self.getImageArraySTD())
+        return self.SNR
+    def getImageArrayMean(self):
+        """
+        return the mean of the image array
+        """
+        if self.Mean is None:
+            self.Mean=np.nanmean(np.abs(self.getImageArray()), axis=-1)
+        return self.Mean
+    def getImageArraySTD(self):
+        """
+        return the standard deviation of the image array
+        """
+        if self.STD is None:
+            self.STD=np.nanstd(np.abs(self.getImageArray()), axis=-1,ddof=1) #matlab 0
+        return self.STD
+    def getImageArrayMax(self):
+        """
+        return the standard deviation of the image array
+        """
+        if self.Max is None:
+            self.Max=np.nanmax(np.abs(self.getImageArray()), axis=-1) #matlab 0
+        return self.Max
+ 
+    def plotImageArray(self, p=0.5):
+        """
+        plot the image array
+        """
+        im = self.getImageArray()
+        for t in range(im.shape[-1]):
+            plt.subplot(121)
+            plt.imshow(im[:, :, t])
+            plt.colorbar()
+            plt.title("Replicas number: " + str(t+1))
+            if t>0:
+                plt.subplot(122)
+                plt.imshow(im[:, :, t]-im[:, :, t-1])
+                plt.title(f'differerence {t+1} - {t}')
+                plt.colorbar()
+            plt.pause(interval=1)
+            plt.show()
+
+class cm2DSignalToNoiseRatioPseudoMultipleReplicas(cm2DSignalToNoiseRatioMultipleReplicas):
+    def __init__(self, x=None, message=None):
+        super().__init__(x, message)
+        self.numberOfReplicas=20
+        self.D=None
+    def createPseudoReplica(self,S,corr_noise_factor):
+        sh=self.reconstructor.getSignalKSpaceSize()
+        N= cm.get_pseudo_noise(msize=[*sh, self.reconstructor.getsignalNCoils()],corr_noise_factor=corr_noise_factor)
+        self.add2DKspace(S+N)
+    def getSNRDenumerator(self):
+        if self.D is None:
+            D=np.nanstd(np.abs(self.getImageArray())+np.max(np.abs(self.getImageArrayMax())), axis=-1,ddof=1)
+            D[D<=np.finfo(np.float64).eps]=1
+            self.D=D
+        return self.D
+    def reset(self):
+        super().reset()
+        self.D=None
+    
+    def getOutput(self):
+        # set the reference image
+        # self.setReferenceImage(self.reconstructor.getOutput())
+        corr_noise_factor=cm.get_correlation_factor(correlation_matrix=self.reconstructor.getNoiseCovariance())
+        S=self.reconstructor.getSignalKSpace()
+
+        for a in range(self.numberOfReplicas):
+            #add in the queue
+            self.createPseudoReplica(S,corr_noise_factor)
+        if self.referenceImage.isEmpty():
+            self.setReferenceImage(self.reconstructor.getOutput())
+        D=self.getSNRDenumerator()
+        SNR=np.divide(self.getReferenceImage(),D)
+        return SNR
+
+class cm2DSignalToNoiseRatioPseudoMultipleReplicasWen(cm2DSignalToNoiseRatioPseudoMultipleReplicas):
+    def __init__(self, x=None, message=None):
+        super().__init__(x, message)
+        self.Type='CR'
+        self.boxSize=2
+
+    def getSNRDenumerator(self):
+        if self.referenceImage.isEmpty():
+            self.setReferenceImage(self.reconstructor.getOutput())
+        r=self.getReferenceImage()-self.getImageArrayMean()
+        return cm.get_wien_noise_image(r,self.boxSize)

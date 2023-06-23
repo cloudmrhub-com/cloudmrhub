@@ -17,6 +17,7 @@ pip install git+https://github.com/cloudmrhub-com/CMRCode.git
 # Example
 Examples can be found in the [git test directoy](https://github.com/cloudmrhub-com/CMRCode/tree/main/cloudmrhub/test)
 
+The codes reads a signal and a noise kspace from siemens scanner and computes reconstructions and snr for RSS and B1
 
 ```
 from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS, cm2DKellmanB1,cm2DReconB1
@@ -31,6 +32,7 @@ import sys
 s= sys.argv[1]
 n=sys.argv[2]
 
+# read the files
 twix=twixtools.map_twix(s)
 im_array = twix[0]['image']
 im_array.flags['remove_os'] = True  # activate automatic os removal
@@ -46,11 +48,7 @@ im_array.flags['average']['Rep'] = False  # average all repetitions
 im_array.flags['average']['Ave'] = False # average all repetitions
 N=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
 
-# N=N[0:2,0:3,0:4]
-# S=S[0:2,0:3,0:4]
-
-
-
+# instantiate th classes
 L=cm2DReconRSS()
 L.setSignalKSpace(S)
 L.setNoiseKSpace(N)
