@@ -1,5 +1,5 @@
 import numpy as np
-import cloudmrhub.cm2D
+import cloudmrhub.cm2D as cm2D
 
 import matplotlib.pyplot as plt
 import  twixtools
