@@ -3,6 +3,11 @@ import json
 from pynico_eros_montin import pynico as pn
 import numpy as np
 import scipy
+
+VERSION ='1'
+
+def printInfo():
+    print('cloudmrhub {VERSION}')
 class i2d:
     """
     A 2d image class to use in CloudMR
