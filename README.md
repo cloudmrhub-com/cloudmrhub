@@ -17,13 +17,19 @@ pip install git+https://github.com/cloudmrhub-com/CMRCode.git
 # Example
 Examples can be found in the [git test directoy](https://github.com/cloudmrhub-com/CMRCode/tree/main/cloudmrhub/test)
 
+
 ```
+from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS, cm2DKellmanB1,cm2DReconB1
+import cloudmrhub.cm as cm
+
 import twixtools
 import numpy as np
 import matplotlib.pyplot as plt
 
-s='cloudmrhub/data/meas_MID00024_FID188178_Multislice.dat'
-n='cloudmrhub/data/meas_MID00027_FID188181_Multislice_no_RF.dat'
+
+import sys
+s= sys.argv[1]
+n=sys.argv[2]
 
 twix=twixtools.map_twix(s)
 im_array = twix[0]['image']
@@ -40,6 +46,37 @@ im_array.flags['average']['Rep'] = False  # average all repetitions
 im_array.flags['average']['Ave'] = False # average all repetitions
 N=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
 
+# N=N[0:2,0:3,0:4]
+# S=S[0:2,0:3,0:4]
+
+
+
+L=cm2DReconRSS()
+L.setSignalKSpace(S)
+L.setNoiseKSpace(N)
+
+NBW=L.getNoiseBandWidth()
+print(NBW)
+nc2=L.getNoiseCovariance()
+plt.figure()
+plt.imshow(np.abs(nc2))
+plt.colorbar()
+plt.title(f'Noise Covariance Matrix BW:{NBW:03f}')
+p=L.getPrewhitenedSignal()
+plt.figure()
+plt.imshow(np.abs(p[:,:,0]))
+plt.colorbar()
+plt.title('Prewhitened Kspace First Coil')
+
+
+
+im=L.getOutput()
+
+import matplotlib.pyplot as plt
+
+plt.imshow(im)
+plt.colorbar()
+plt.title('RSS Recon')
 
 L=cm2DKellmanRSS()
 L.setSignalKSpace(S)
@@ -50,10 +87,39 @@ snr=L.getOutput()
 plt.imshow(snr)
 plt.colorbar()
 plt.title('RSS SNR')
+
+
+
+L=cm2DReconB1()
+L.setSignalKSpace(S)
+L.setNoiseKSpace(N)
+L.setCoilSensitivityMatrixSource(S)
+L.setCoilSensitivityMatrixCalculationMethod('inner')
+for t in range(S.shape[-1]):
+    NN=np.sqrt(S.shape[-1])
+    plt.subplot(int(NN),int(NN),t+1)
+    plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
+    plt.title(f'Coil {t}')
+
+plt.figure()
+plt.imshow(L.getOutput())
+plt.title('B1 Recon')
+
+L=cm2DKellmanB1()
+L.setSignalKSpace(S)
+L.setNoiseKSpace(N)
+L.setCoilSensitivityMatrixSource(S)
+L.setCoilSensitivityMatrixCalculationMethod('inner')
+plt.figure()
+plt.imshow(L.getOutput())
+plt.colorbar()
+plt.title('SNR B1')
+
+
+
+
 plt.show()
-
 ```
-
 # Roadmap
 
 [ ] SNR
