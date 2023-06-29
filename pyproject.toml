@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "cloudmrhub"
-version = "0.1.0"
+version = "0.1.5"
 authors = [
   { name="Dr. Eros Montin, PhD", email="eros.montin@gmail.com" },
 ]
@@ -19,7 +19,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["matplotlib","scipy","Pillow","sphinx", "sphinx_rtd_theme","raider_eros_montin @ git+https://github.com/erosmontin/raider.git","pynico_eros_montin @ git+https://github.com/erosmontin/pynico.git"]
+dependencies = ["matplotlib","scipy","Pillow","sphinx", "sphinx_rtd_theme","raider_eros_montin @ git+https://github.com/erosmontin/raider.git","pynico_eros_montin @ git+https://github.com/erosmontin/pynico.git","pyable_eros_montin @ git+https://github.com/erosmontin/pyable.git"]
 
 [project.urls]
 "Homepage" = "https://github.com/erosmontin/cmrocode"
