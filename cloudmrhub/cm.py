@@ -4,7 +4,7 @@ from pynico_eros_montin import pynico as pn
 import numpy as np
 import scipy
 
-VERSION ='1'
+VERSION ='1.5'
 
 def printInfo():
     print('cloudmrhub {VERSION}')
@@ -574,13 +574,6 @@ def getUndersampleGrids(K, frequencyacceleration, phaseacceleration):
     Ysamp = np.arange(0, nY, phaseacceleration)    
     Xsamp = np.arange(0, nX, frequencyacceleration)
     return Xsamp,Ysamp
-
-
-
-    
-
-    
-
 def undersample2DDataSENSE(K, frequencyacceleration=1,phaseacceleration=1):
     x,y=getUndersampleGrids(K,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration)
     OK=np.zeros((K.shape),dtype=complex)
@@ -588,8 +581,6 @@ def undersample2DDataSENSE(K, frequencyacceleration=1,phaseacceleration=1):
         for _y in y:
             OK[_x,_y,:]=K[_x,_y,:]
     return OK
-
-
 def undersample2DDatamSENSE(K, frequencyacceleration=1,phaseacceleration=1,phaseACL=1):
     x,y=getACLANDUndersampleGrids(K,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration,phaseautocalibration=phaseACL)
     OK=np.zeros((K.shape),dtype=complex)
