@@ -67,17 +67,19 @@ classdef cm2DReconSENSE<cm2DReconWithSensitivityAutocalibrated
             %m=zeros(nf,np);
             for irow=1:floor(nf/R1)
                 for icol=1:floor(np/R2)
-                    current_R1 = length(irow:floor(nf/R1):nf);
-                    current_R2 = length(icol:floor(np/R2):np);
+                    r1=irow:floor(nf/R1):nf;
+                    r2=icol:floor(np/R2):np;
+                    current_R1 = length(r1);
+                    current_R2 = length(r2);
                     current_Rtot = current_R1*current_R2;
-                    s = squeeze(pw_sensmap(irow:floor(nf/R1):nf,icol:floor(np/R2):np,:));   % Gather the aliased pixels into the sensitivity matrix
+                    s = squeeze(pw_sensmap(r1,r2,:));   % Gather the aliased pixels into the sensitivity matrix
                     s = reshape(s,[current_Rtot nc]);
                     s = s.';
+                    s(isnan(s)) = 0;
                     u = pinv(s'*invRn*s)*(s'*invRn);
                     u(isnan(u)) = 0;
-                    MRimage(irow:floor(nf/R1):nf,icol:floor(np/R2):np)=reshape(u*squeeze(imfold(irow,icol,:)),[current_R1 current_R2]); % put this recon into the right places in the image
-                  %  m(irow:floor(nf/R1):nf,icol:floor(np/R2):np)=m(irow:floor(nf/R1):nf,icol:floor(np/R2):np)+1;
-                   % imagesc(m);colorbar(); pause(0.1);
+                    MRimage(r1,r2)= ...
+                        reshape(u*squeeze(imfold(irow,icol,:)),[current_R1 current_R2]); % put this recon into the right places in the image
                 end
             end
             

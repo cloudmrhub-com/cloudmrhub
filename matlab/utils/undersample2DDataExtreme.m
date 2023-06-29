@@ -2,7 +2,7 @@ function [KOUT, SHRINK,MASK, info,ACL]=undersample2DDataExtreme(K,frequencyaccel
 %K is a kspace 2d data (frequency,phase,coil)
 % frequency accelration, phaseacceleration,
 % set ACS lines for mSense simulation (fully sampled central k-space
-% region) % output image is 100% with 
+% region) % output image is 100% with
 
 
 
@@ -22,16 +22,16 @@ function [KOUT, SHRINK,MASK, info,ACL]=undersample2DDataExtreme(K,frequencyaccel
 %         phaseautocalibration=24;
 %     end
 % end
-% 
-% 
+%
+%
 % if (~exist('frequencyacceleration','var'))
 %     frequencyacceleration=1;
 % end
 % if (~exist('phaseacceleration','var'))
 %     phaseacceleration=1;
 % end
-% 
-% 
+%
+%
 
 if frequencyacceleration>=nX
     KOUT=NaN;
@@ -45,7 +45,7 @@ end
 
 
 if mod(nY,phaseacceleration)>0
-            NY=ceil(nY/phaseacceleration)*phaseacceleration;
+    NY=ceil(nY/phaseacceleration)*phaseacceleration;
 else
     NY=NaN;
 end
@@ -53,7 +53,7 @@ end
 
 
 if mod(frequencyacceleration,2)>0
-            NX=ceil(nX/frequencyacceleration)*frequencyacceleration;
+    NX=ceil(nX/frequencyacceleration)*frequencyacceleration;
 else
     NX=NaN;
 end
@@ -64,63 +64,88 @@ if (~isnan(NX) || ~isnan(NY))
         NX=nX % no resampling needed in this direction;
     end
     
-        if(isnan(NY))
+    if(isnan(NY))
         NY=nY % no resampling needed in this direction;
-        end
-
-        NK=zeros(NX,NY,nCoils);
+    end
     
-   for c=1:nCoils
-       %new grid
-       [newxg,newyg]=ndgrid(linspace(1,nX,NX),linspace(1,nY,NY));
-       %old grid
-       [oldxg,oldyg]=ndgrid(linspace(1,nX,nX),linspace(1,nY,nY));
-       %scattered interpolation
+    NK=zeros(NX,NY,nCoils);
+    
+    for c=1:nCoils
+        %new grid
+        [newxg,newyg]=ndgrid(linspace(1,nX,NX),linspace(1,nY,NY));
+        %old grid
+        [oldxg,oldyg]=ndgrid(linspace(1,nX,nX),linspace(1,nY,nY));
+        %scattered interpolation
         theK=squeeze(K(:,:,c));
         FR=scatteredInterpolant([oldxg(:) oldyg(:)],double(real(theK(:))));
         FI=scatteredInterpolant([oldxg(:) oldyg(:)],double(imag(theK(:))));
         %composition of the channels
         NK(:,:,c)=FR(newxg,newyg) +1i*FI(newxg,newyg);
-   end
-   
-   K=NK;
-   nX=NX;
-   nY=NY;
+    end
+    
+    K=NK;
+    nX=NX;
+    nY=NY;
 end
 
 %check autocalibration > size K
-    if isnan(phaseautocalibration)
-        phaseautocalibration=nY; % take all of them
-    end
+if isnan(phaseautocalibration)
+    phaseautocalibration=nY; % take all of them
+end
 
 
-    if isnan(frequencyautocalibration)
-        frequencyautocalibration=nX; % take all of them
-    end
-    
-    
+if isnan(frequencyautocalibration)
+    frequencyautocalibration=nX; % take all of them
+end
+
+
 
 ACL=[];
-ACShw = floor(phaseautocalibration/2) ; 
-ACShh = floor(frequencyautocalibration/2) ; 
+ACShw = floor(phaseautocalibration/2) ;
+ACShh = floor(frequencyautocalibration/2) ;
+Ysamp_u = [1:phaseacceleration:nY] ; % undersampling
+if (~isnan(phaseautocalibration))
+    if(phaseautocalibration>0)
+        Ysamp_ACS = [floor(nY/2)-ACShw+1 : floor(nY/2)+ACShw] ; % GRAPPA autocalibration lines
+        Ysamp = union(Ysamp_u, Ysamp_ACS) ; % actually sampled lines
+    else
+        Ysamp_ACS=[];
+        Ysamp=Ysamp_u;
+    end
+else
+    Ysamp_ACS=[];
+    Ysamp=Ysamp_u;
+end
 
-Ysamp_u = [1:phaseacceleration:nY] ; % undersampling 
-Ysamp_ACS = [floor(nY/2)-ACShw+1 : floor(nY/2)+ACShw] ; % GRAPPA autocalibration lines
-Ysamp = union(Ysamp_u, Ysamp_ACS) ; % actually sampled lines
+
 nYsamp = length(Ysamp) ; % number of actually sampled
 nYsamp_u=length(Ysamp_u);
 
-Xsamp_u = [1:frequencyacceleration:nX] ; % undersampling 
-Xsamp_ACS = [floor(nX/2)-ACShh+1 : floor(nX/2)+ACShh] ; % GRAPPA autocalibration lines
-Xsamp = union(Xsamp_u, Xsamp_ACS) ; % actually sampled lines
+Xsamp_u = [1:frequencyacceleration:nX] ; % undersampling
+if (~isnan(frequencyautocalibration))
+    
+    if (frequencyautocalibration>0)
+        
+        Xsamp_ACS = [floor(nX/2)-ACShh+1 : floor(nX/2)+ACShh] ; % GRAPPA autocalibration lines
+        Xsamp = union(Xsamp_u, Xsamp_ACS) ; % actually sampled lines
+    else
+        Xsamp_ACS=[];
+        Xsamp=Xsamp_u;
+    end
+    
+else
+    Xsamp_ACS=[];
+    Xsamp=Xsamp_u;
+    
+end
+
 nXsamp = length(Xsamp) ; % number of actually sampled
 nXsamp_u=length(Xsamp_u);
 
 
 
-
-% Ysamp indexes the actually sampled lines to the encoded k-space line number. 
-% For example, if there were just regular factor 2 undersampling 
+% Ysamp indexes the actually sampled lines to the encoded k-space line number.
+% For example, if there were just regular factor 2 undersampling
 % (with no ACS lines), Ysamp would have length 128 and be [1 3 5 ... 255].
 % With ACS lines, the elements of Ysamp are separated by 2 near the k-space
 % edges, and by 1 in the central ACS region.
@@ -153,9 +178,8 @@ info.ACL.Y=Ysamp_ACS;
 
 
 
-   
+
 if nargout>4
     ACL=K(Xsamp_ACS,Ysamp_ACS,:);
 end
 
-        

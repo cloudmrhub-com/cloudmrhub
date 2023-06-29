@@ -35,6 +35,23 @@ classdef cm2DReconWithSensitivityAutocalibrated<cm2DReconWithSensitivity
             
         end
         
+                function coilsens_set=getCoilSensitivityMatrixForFullySampledKSpaceSimpleSense(this)
+            %in this case sens_matrix is the full image
+            nc=this.getSignalNCoils;
+            sensmap_temp = MRifft(this.getCoilSensitivityMatrixSource(),[1,2]);
+            ref_img = sqrt(sum(abs(sensmap_temp).^2,3));
+            coilsens_set = sensmap_temp./repmat(ref_img,[1 1 nc]);
+            if(this.getMaskCoilSensitivityMatrix())
+            sensmask = ref_img>mean(ref_img(:));
+            sensmaskrep = repmat(sensmask,[1 1 nc]);
+            coilsens_set = coilsens_set.*sensmaskrep;
+            end
+            %prewhitening
+            coilsens_set = this.prewhiteningSignal(coilsens_set, this.getNoiseCovariance() );
+            this.logIt(['sensitivity map calculated as simplesense'],'ok');
+            
+                end
+        
         function coilsens_set=getCoilSensitivityMatrixForUnderSampledKSpaceSimpleSense(this)
             %in this case sens_matrix is the full image
             nc=this.getSignalNCoils;
@@ -108,7 +125,7 @@ classdef cm2DReconWithSensitivityAutocalibrated<cm2DReconWithSensitivity
                     this.logIT(['sensitivity map calculated as espirit'],'ok');
                     
                     coilsens_set = espirit_sensitivitymap(this.getCoilSensitivityMatrixPrewhitened(),this.getAutocalibrationPhase());
-                case {'simplesense','internal reference','inner'}
+                case {'simplesenseacl','internal referenceacl','inneracl'}
                     this.logIt(['sensitivity map calculated as simplesense'],'?');
                     coilsens_set=this.getCoilSensitivityMatrixForUnderSampledKSpaceSimpleSense();
             end
@@ -230,14 +247,13 @@ classdef cm2DReconWithSensitivityAutocalibrated<cm2DReconWithSensitivity
     end
     
     methods(Static)
-              
         function o=needsRegridding(K,accf,accp)
             o=false;        
             S=size(K);
             if (sum(mod(S(1:2),[accf accp]))~=0)
                 o=true;
             end
-              end
+        end
             
         function ACS=getAutocalibrationsLinesKSpace(K,ACLf,ACLp)
             %ACLf=naN to get all the lines o the freq directions

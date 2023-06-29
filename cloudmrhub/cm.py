@@ -145,16 +145,17 @@ class cmOutput:
 
 
 def prewhiteningSignal(signalrawdata, psi):
-    L = np.linalg.cholesky(psi)
-    L_inv = np.linalg.inv(L)
+    L = np.linalg.cholesky(psi).astype(complex)
+    L_inv = np.linalg.inv(L).astype(complex)
+    
     nc = signalrawdata.shape[-1]
     nf = signalrawdata.shape[0]
     nph = signalrawdata.shape[1]
-    pw_signalrawdata = np.transpose(signalrawdata, [2, 1, 0])  # [ncoil nphase nfreq]
+    pw_signalrawdata = pw_signalrawdata = np.transpose(signalrawdata, [2, 1,0])  # [ncoil nfreq, nphasex]
     shape= pw_signalrawdata.shape
-    output = pw_signalrawdata.reshape((shape[0], shape[1]*shape[2]))
+    output=pw_signalrawdata.reshape(shape[0],shape[1]*shape[2],order='F')
     pw_signalrawdata = np.matmul(L_inv, output)
-    pw_signalrawdata = np.reshape(pw_signalrawdata, [nc, nph, nf])
+    pw_signalrawdata = np.reshape(pw_signalrawdata, [nc, nph, nf],order='F')
     pw_signalrawdata = np.transpose(pw_signalrawdata, [2, 1, 0])  # [nfreq nphase ncoil]
     return pw_signalrawdata
 
@@ -459,7 +460,7 @@ def mrir_noise_bandwidth(noise):
     dims = noise.shape
     power_spectrum = np.abs(np.fft.fft(noise, axis=0))**2
     power_spectrum_chan = np.mean(power_spectrum, axis=1)
-    N=np.concatenate([power_spectrum_chan[:int(dims[0] / 4)],power_spectrum_chan[int(3*dims[0] / 4)::]])
+    N=np.concatenate([power_spectrum_chan[:dims[0] // 4],power_spectrum_chan[3*dims[0] // 4-1::]])
     power_spectrum_norm = np.mean(N, axis=0)
     norm_power_spectrum_chan = power_spectrum_chan / np.repeat(power_spectrum_norm[None, :], dims[0], axis=0)
     noise_bandwidth_chan = np.sum(norm_power_spectrum_chan, axis=0) / dims[0]

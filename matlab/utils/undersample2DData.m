@@ -9,38 +9,6 @@ function [KOUT, SHRINK,MASK, info,ACL]=undersample2DData(K,frequencyacceleration
 
 [nX, nY, nCoils]=size(K);
 
-
-%check autocalibration > size K
-    if isnan(phaseautocalibration)
-        phaseautocalibration=nY; % take all of them
-    end
-
-
-    if isnan(frequencyautocalibration)
-        frequencyautocalibration=nX; % take all of them
-    end
-
-
-
-
-% if (~exist('phaseautocalibration','var'))
-%     if isnan(phaseautocalibration)
-%         phaseautocalibration=nY; % take all of them
-%     else
-%         phaseautocalibration=24;
-%     end
-% end
-% 
-% 
-% if (~exist('frequencyacceleration','var'))
-%     frequencyacceleration=1;
-% end
-% if (~exist('phaseacceleration','var'))
-%     phaseacceleration=1;
-% end
-% 
-% 
-
 if frequencyacceleration>=nX
     KOUT=NaN;
     return;
@@ -52,23 +20,46 @@ if phaseacceleration>=nY
 end
 
 
-% if mod(phaseacceleration,2)>0
-%     KOUT=NaN;
-%     return;
-% end
 ACL=[];
 ACShw = phaseautocalibration/2 ; 
 ACShh = frequencyautocalibration/2 ; 
 
-Ysamp_u = [1:phaseacceleration:nY] ; % undersampling 
-Ysamp_ACS = [floor(nY/2)-ACShw+1 : floor(nY/2)+ACShw] ; % GRAPPA autocalibration lines
-Ysamp = union(Ysamp_u, Ysamp_ACS) ; % actually sampled lines
+Ysamp_u = [1:phaseacceleration:nY] ; % undersampling
+if (~isnan(phaseautocalibration))
+    if(phaseautocalibration>0)
+        Ysamp_ACS = [floor(nY/2)-ACShw+1 : floor(nY/2)+ACShw] ; % GRAPPA autocalibration lines
+        Ysamp = union(Ysamp_u, Ysamp_ACS) ; % actually sampled lines
+    else
+        Ysamp_ACS=[];
+        Ysamp=Ysamp_u;
+    end
+else
+    Ysamp_ACS=[];
+    Ysamp=Ysamp_u;
+end
+
+
 nYsamp = length(Ysamp) ; % number of actually sampled
 nYsamp_u=length(Ysamp_u);
 
-Xsamp_u = [1:frequencyacceleration:nX] ; % undersampling 
-Xsamp_ACS = [floor(nX/2)-ACShh+1 : floor(nX/2)+ACShh] ; % GRAPPA autocalibration lines
-Xsamp = union(Xsamp_u, Xsamp_ACS) ; % actually sampled lines
+Xsamp_u = [1:frequencyacceleration:nX] ; % undersampling
+if (~isnan(frequencyautocalibration))
+    
+    if (frequencyautocalibration>0)
+        
+        Xsamp_ACS = [floor(nX/2)-ACShh+1 : floor(nX/2)+ACShh] ; % GRAPPA autocalibration lines
+        Xsamp = union(Xsamp_u, Xsamp_ACS) ; % actually sampled lines
+    else
+        Xsamp_ACS=[];
+        Xsamp=Xsamp_u;
+    end
+    
+else
+    Xsamp_ACS=[];
+    Xsamp=Xsamp_u;
+    
+end
+
 nXsamp = length(Xsamp) ; % number of actually sampled
 nXsamp_u=length(Xsamp_u);
 

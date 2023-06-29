@@ -62,7 +62,7 @@ classdef cm2DGFactorSENSE<cm2DReconSENSE
                     s = squeeze(pw_sensmap(irow:floor(nf/R1):nf,icol:floor(np/R2):np,:));   % Gather the aliased pixels into the sensitivity matrix
                     s = reshape(s,[current_Rtot nc]);
                     s = s.';
-                    u = pinv(s'*invRn*s)*(s'*invRn);
+%                     u = pinv(s'*invRn*s)*(s'*invRn);
                     u(isnan(u)) = 0;
             G(irow:floor(nf/R1):nf,icol:floor(np/R2):np) = reshape(sqrt(abs(diag(pinv(s'*invRn*s)).*diag(s'*invRn*s))),[current_R1 current_R2]);
                 end

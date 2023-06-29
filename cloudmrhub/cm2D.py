@@ -193,9 +193,11 @@ class cm2DRecon(cm.cmOutput):
         TEST = self.testrecon()
         self.plotImageAfterTest(TEST.getOutput(), "recon")
         return TEST
-    def get2DKSIFFT(self):
-        SC=np.sqrt(np.prod(np.array(self.getSignalKSpaceSize())))
-        return cm.MRifft(self.getPrewhitenedSignal(),[0,1])*SC
+    def get2DKSIFFT(self,K=None):
+        if K is None:
+            K=self.getPrewhitenedSignal()
+        SC=np.sqrt(np.prod(np.array(K.shape[0:2])))
+        return cm.MRifft(K,[0,1])*SC
     def getOutput(self):
         pass
     def resetAfterSignal(self):
@@ -340,10 +342,16 @@ class cm2DReconWithSensitivity(cm2DRecon):
     def resetCoilSensitivityMatrix(self):
         self.CoilSensitivityMatrix.reset()
 
+    def __selectCoilSensitivityMapMethod__(self):
+        s=None
+        if ((self.getCoilSensitivityMatrixCalculationMethod() == 'simplesense') or (self.getCoilSensitivityMatrixCalculationMethod() =='inner')):
+                s=self.getCoilSensitivityMatrixSimpleSense
+        return s
+
     def calculateCoilSensitivityMatrix(self):
         if self.CoilSensitivityMatrix.isEmpty():
-            if ((self.getCoilSensitivityMatrixCalculationMethod() == 'simplesense') or (self.getCoilSensitivityMatrixCalculationMethod() =='inner')):
-                s=self.getCoilSensitivityMatrixSimpleSense()
+            CSM=self.__selectCoilSensitivityMapMethod__()
+            s=CSM()
         else:
             s=self.getCoilSensitivityMatrix()
         return s
