@@ -467,3 +467,166 @@ def mrir_noise_bandwidth(noise):
     noise_bandwidth = np.mean(noise_bandwidth_chan)
 
     return noise_bandwidth
+
+
+
+from pyable_eros_montin import imaginable as ima
+
+
+def getAutocalibrationsLines2DKSpaceZeroPadded(K,AutocalibrationF,AutocalibrationP):
+    """return a 2D multicoil Kspace data zeropadded with inside the KSpace in the ACL
+
+    Args:
+        K (nd.array(f,p,c)): Kspace
+        AutocalibrationF (int): Number of Autocalibration in the Frequency
+        AutocalibrationP (int): Number of Autocalibration in the Phase
+    Returns:
+        OK: np.array([f,p,c])
+    """
+    x,y=getACLGrids(K,AutocalibrationF,AutocalibrationP)
+    OK=np.zeros_like(K)
+    for _x in x:
+        for _y in y:
+            OK[_x,_y]=K[_x,_y]
+    return OK
+
+
+def resizeIM2D(IM,new_size):
+    """resize a 2d image on the new size
+
+    Args:
+        IM (np.array([x,y])): the image
+        new_size (np.array([sx,sy])): the new size
+
+    Returns:
+        _type_: _description_
+    """
+    if np.iscomplex(IM[0,0]):
+        R=ima.numpyToImaginable(np.real(IM))
+        I=ima.numpyToImaginable(np.imag(IM))
+        R.changeImageSize(new_size)
+        I.changeImageSize(new_size)
+        return R.getImageAsNumpy() + 1j* I.getImageAsNumpy()
+    else:
+        R=ima.numpyToImaginable(IM)
+        R.changeImageSize(new_size)
+        return R.getImageAsNumpy()
+
+    # if isinstance(IM[0,0],complex):
+    #     R=ima.numpyToImaginable(np.real(IM))
+    #     I=ima.numpyToImaginable(np.imag(IM))
+
+
+
+
+
+
+
+
+def needs_regridding(K, accf, accp):
+  """
+  Checks if the input array needs to be regridded.
+
+  Args:
+    K: The input array.
+    accf: The horizontal accuracy factor.
+    accp: The vertical accuracy factor.
+
+  Returns:
+    True if the array needs to be regridded, False otherwise.
+  """
+ 
+  S = K.shape
+  if sum(np.mod(S[1:2], [accf, accp])) != 0:
+    return True
+  else:
+     return False
+
+def getACLANDUndersampleGrids(K, frequencyacceleration, phaseacceleration, frequencyautocalibration=0, phaseautocalibration=0):
+    ACLx,ACLy=getACLGrids(K, frequencyautocalibration, phaseautocalibration)
+    Ux,Uy=getUndersampleGrids(K, frequencyacceleration, phaseacceleration)
+    return np.union1d(ACLx,Ux),np.union1d(ACLy,Uy)
+   
+def getACLGrids(K, frequencyautocalibration, phaseautocalibration):
+    nX, nY, nCoils = K.shape
+    if phaseautocalibration > nY or frequencyautocalibration > nX:
+        raise Exception('The Number of requested Autocalibrations lines is greater than the kspace size')
+    # Ysamp_u = np.arange(0, nY, phaseacceleration)
+    # Ysamp_ACL = np.arange(nY // 2 - phaseautocalibration // 2 ,
+    #                         nY // 2 + phaseautocalibration // 2)
+    if phaseautocalibration>0:
+        Ysamp_ACL = np.arange(nY//2-phaseautocalibration//2+1 , np.floor(nY/2)+phaseautocalibration//2,dtype=int)
+    else:
+        Ysamp_ACL =np.array([],dtype=int)
+
+    # Ysamp = np.union1d(Ysamp_u, Ysamp_ACL)
+    # Xsamp_u = np.arange(0, nX, frequencyacceleration)
+    if frequencyautocalibration>0:
+        Xsamp_ACL = np.arange(nX//2-frequencyautocalibration//2+1 , np.floor(nX/2)+frequencyautocalibration//2,dtype=int)
+    else:
+        Xsamp_ACL =np.array([],dtype=int)
+
+    # Xsamp = np.union1d(Xsamp_u, Xsamp_ACL)
+    return Xsamp_ACL,Ysamp_ACL
+
+def getUndersampleGrids(K, frequencyacceleration, phaseacceleration):
+    nX, nY, nCoils = K.shape
+    Ysamp = np.arange(0, nY, phaseacceleration)    
+    Xsamp = np.arange(0, nX, frequencyacceleration)
+    return Xsamp,Ysamp
+
+
+
+    
+
+    
+
+def undersample2DDataSENSE(K, frequencyacceleration=1,phaseacceleration=1):
+    x,y=getUndersampleGrids(K,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration)
+    OK=np.zeros((K.shape),dtype=complex)
+    for _x in x:
+        for _y in y:
+            OK[_x,_y,:]=K[_x,_y,:]
+    return OK
+
+
+def undersample2DDatamSENSE(K, frequencyacceleration=1,phaseacceleration=1,phaseACL=1):
+    x,y=getACLANDUndersampleGrids(K,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration,phaseautocalibration=phaseACL)
+    OK=np.zeros((K.shape),dtype=complex)
+    for _x in x:
+        for _y in y:
+            OK[_x,_y]=K[_x,_y]
+    return OK
+
+
+def undersample2DDatamGRAPPA(K, frequencyacceleration=1,phaseacceleration=1,frequencyACL=1,phaseACL=1):
+    x,y=getACLANDUndersampleGrids(K,1,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration,frequencyautocalibration=frequencyACL,phaseautocalibration=phaseACL)
+    OK=np.zeros((K.shape),dtype=complex)
+    for _x in x:
+        for _y in y:
+            OK[_x,_y,:]=K[_x,_y,:]
+    return OK
+
+def shrinktoaliasedmatrix_2d(K,frequencyacceleration=1,phaseacceleration=1):
+    S=np.array(K.shape)//np.array([frequencyacceleration,phaseacceleration,1])
+    OK=np.zeros(S,dtype=complex)
+    x=np.arange(0,S[0])
+    y=np.arange(0,S[1])
+    for i,_x in enumerate(x):
+        for j,_y in enumerate(y):
+            OK[i,j,:]=K[_x,_y,:]
+    return OK
+
+
+
+def calculate_simple_sense_sensitivitymaps_acl(K,autocalibrationF,autocalibrationP,mask=None):
+    """Calculates the coil sensitivity maps using the simple SENSE method on undersampled Kspace.
+
+    Args:
+        K: freq,phase,coil numpy array of the kspace 
+
+
+    Returns:
+        The coil sensitivity matrix.
+    """
+    return calculate_simple_sense_sensitivitymaps(getAutocalibrationsLines2DKSpaceZeroPadded(K,autocalibrationF,autocalibrationP),mask)

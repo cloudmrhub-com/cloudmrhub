@@ -498,7 +498,214 @@ class cm2DKellmanB1(cm2DReconB1):
                             den=np.sqrt(np.abs(ST @ invRn @ S))
                             im[irow,icol] = np.divide(num,den)
         return im
+
+class cm2DReconWithSensitivityAutocalibrated(cm2DReconWithSensitivity):
+    """
+    Python implementation of the m2DReconWithSensitivityAutocalibrated MATLAB class
+   
+    :author:
+        Dr. Eros Montin, Ph.D. <eros.montin@gmail.com>
+    :date:
+        16/06/2003
+    :note:
+        This work was supported in part by the National Institute of Biomedical Imaging and Bioengineering (NIBIB) of the National Institutes of Health under Award Number R01 EB024536 and P41 EB017183. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
+    """
     
+    def __init__(self):
+        """
+        Initializes the reconstruction.
+        
+        """
+        super().__init__()
+        self.HasAcceleration= True
+        self.HasSensitivity=True
+        self.AutocalibrationF =None
+        self.AutocalibrationP =None
+        self.AccelerationF =0
+        self.AccelerationP=0
+
+    def getCoilSensitivityMatrixSimpleSenseACL(self):
+        # MASK 
+        if self.CoilSensitivityMatrix.isEmpty():       
+            if self.CoilSensitivityMatrixSource.isEmpty():
+                s=self.getSignalKSpace()
+            else:
+                s=self.getCoilSensitivityMatrixSource()
+            self.setCoilSensitivityMatrix(cm.prewhiteningSignal(cm.calculate_simple_sense_sensitivitymaps_acl(s,self.AutocalibrationF,self.AutocalibrationP,self.MaskCoilSensitivityMatrix), self.getNoiseCovariance() ))
+        return self.CoilSensitivityMatrix.get()
+
+
+    def __selectCoilSensitivityMapMethod__(self):
+        s=None
+        s=super().__selectCoilSensitivityMapMethod__()
+        if s is None:
+            if ((self.getCoilSensitivityMatrixCalculationMethod() == 'simplesenseACL') or (self.getCoilSensitivityMatrixCalculationMethod() =='innerACL')):
+                s=self.getCoilSensitivityMatrixSimpleSenseACL
+        return s
+
+
+
+class cm2DReconSense(cm2DReconWithSensitivityAutocalibrated):
+    """_summary_
+    class to reconstruct as SENSE the kspace.
+    AutocalibrationsP are set to 0
+    AutocalibrationF are set after setting the songalkspace
+    to KS.shape[0]
+
+    """
+    def __init__(self):
+        super().__init__()
+        delattr(self,'AutocalibrationF')
+        delattr(self,'AutocalibrationP')
+    
+    def undersamplerZeroPadded(self,k):
+        return cm.undersample2DDataSENSE(k,self.AccelerationF,self.AccelerationP)
+
+    def setSignalKSpace(self, signalKSpace):
+        super().setSignalKSpace(signalKSpace)
+        self.AutocalibrationF=signalKSpace.shape[0]
+        
+        
+        
+    def getOutput(self):
+        R1=self.AccelerationF
+        R2=self.AccelerationP
+        Rtot = R1 * R2
+        nc=self.getsignalNCoils()
+        nf,nph = self.getSignalKSpaceSize()
+        invRn=self.getInverseNoiseCovariancePrewhitened()
+        pw_signalrawdata=self.getPrewhitenedSignal()     
+        k_temp = self.undersamplerZeroPadded(pw_signalrawdata)
+        img_matrix = self.get2DKSIFFT(k_temp) * np.sqrt(Rtot)
+        imfold=cm.shrinktoaliasedmatrix_2d(img_matrix,R1,R2)
+        
+        pw_sensmap=self.getCoilSensitivityMatrix()
+        MRimage = np.zeros((nf, nph),dtype=complex)
+        for irow in range(nf // R1):
+            for icol in range(nph//R2):
+                r1=np.arange(irow,nf,nf//R1)
+                r2=np.arange(icol,nph,nph//R2)
+                current_R1 = len(r1)
+                current_R2 = len(r2)
+                current_Rtot = current_R1 * current_R2
+                s=np.zeros((current_R1,current_R2,nc),dtype=complex)
+                for i,_x in enumerate(r1):
+                    for j,_y in enumerate(r2):
+                        s[i,j,:] = pw_sensmap[_x,_y, :]
+                s = s.reshape((current_Rtot, nc),order='F')
+                s = np.transpose(s,[1,0])
+                s[np.isnan(s)] = 0 + 1j*0
+                u = np.linalg.pinv(s.conj().T @ invRn @ s) @ (s.conj().T @ invRn)
+                u[np.isnan(u)] = 0 + 1j*0
+                U=np.reshape(u @ imfold[irow,icol],(current_R1,current_R2),order='F')
+                for i,_x in enumerate(r1):
+                    for j,_y in enumerate(r2):
+                        MRimage[_x,_y] = U[i,j]
+
+        if (cm.needs_regridding(self.getSignalKSpace(),R1,R2)):
+            MRimage=cm.resizeIM2D(MRimage,self.getSignalKSpaceSize());
+        return MRimage
+                
+
+class cm2DKellmanSense(cm2DReconSense):
+    def getOutput(self):
+        R1=self.AccelerationF
+        R2=self.AccelerationP
+        Rtot = R1 * R2
+        nc=self.getsignalNCoils()
+        nf,nph = self.getSignalKSpaceSize()
+        invRn=self.getInverseNoiseCovariancePrewhitened()
+        pw_signalrawdata=self.getPrewhitenedSignal()     
+        k_temp = self.undersamplerZeroPadded(pw_signalrawdata)
+        img_matrix = self.get2DKSIFFT(k_temp) * np.sqrt(Rtot)
+        imfold=cm.shrinktoaliasedmatrix_2d(img_matrix,R1,R2)
+        
+        pw_sensmap=self.getCoilSensitivityMatrix()
+        Rn = np.eye(nc); #it's prewhitened
+        MRimage = np.zeros((nf, nph),dtype=complex)
+        _c=np.sqrt(2.0)
+        for irow in range(nf // R1):
+            for icol in range(nph//R2):
+                r1=np.arange(irow,nf,nf//R1)
+                r2=np.arange(icol,nph,nph//R2)
+                current_R1 = len(r1)
+                current_R2 = len(r2)
+                current_Rtot = current_R1 * current_R2
+                s=np.zeros((current_R1,current_R2,nc),dtype=complex)
+                for i,_x in enumerate(r1):
+                    for j,_y in enumerate(r2):
+                        s[i,j,:] = pw_sensmap[_x,_y, :]
+                s = s.reshape((current_Rtot, nc),order='F')
+                s = np.transpose(s,[1,0])
+                s[np.isnan(s)] = 0 + 1j*0
+                u = np.linalg.pinv(s.conj().T @ invRn @ s) @ (s.conj().T @ invRn)
+                u[np.isnan(u)] = 0 + 1j*0
+                U=np.reshape(u @ imfold[irow,icol]/np.diag(np.sqrt(u @ Rn @ u.conj().T)),(current_R1,current_R2),order='F')
+                for i,_x in enumerate(r1):
+                    for j,_y in enumerate(r2):
+                        MRimage[_x,_y] = _c*U[i,j]
+
+        if (cm.needs_regridding(self.getSignalKSpace(),R1,R2)):
+            MRimage=cm.resizeIM2D(MRimage,self.getSignalKSpaceSize())
+        return MRimage
+
+
+class cm2DGfactorSense(cm2DKellmanSense):
+    def getOutput(self):
+        R1=self.AccelerationF
+        R2=self.AccelerationP
+        Rtot = R1 * R2
+        nc=self.getsignalNCoils()
+        nf,nph = self.getSignalKSpaceSize()
+        invRn=self.getInverseNoiseCovariancePrewhitened()
+        pw_signalrawdata=self.getPrewhitenedSignal()     
+        k_temp = self.undersamplerZeroPadded(pw_signalrawdata)
+        pw_sensmap=self.getCoilSensitivityMatrix()
+        MRimage = np.zeros((nf, nph),dtype=complex)
+        _c=np.sqrt(2.0)
+        for irow in range(nf // R1):
+            for icol in range(nph//R2):
+                r1=np.arange(irow,nf,nf//R1)
+                r2=np.arange(icol,nph,nph//R2)
+                current_R1 = len(r1)
+                current_R2 = len(r2)
+                current_Rtot = current_R1 * current_R2
+                s=np.zeros((current_R1,current_R2,nc),dtype=complex)
+                for i,_x in enumerate(r1):
+                    for j,_y in enumerate(r2):
+                        s[i,j,:] = pw_sensmap[_x,_y, :]
+                s = s.reshape((current_Rtot, nc),order='F')
+                s = np.transpose(s,[1,0])
+                s[np.isnan(s)] = 0 + 1j*0
+                u1=s.conj().T @ invRn @ s
+                u = np.diag(np.linalg.pinv(u1))*np.diag(u1)
+                u[np.isnan(u)] = 0 + 1j*0
+                U=np.reshape(u,(current_R1,current_R2),order='F')
+                for i,_x in enumerate(r1):
+                    for j,_y in enumerate(r2):
+                        MRimage[_x,_y] = _c*U[i,j]
+
+        if (cm.needs_regridding(self.getSignalKSpace(),R1,R2)):
+            MRimage=cm.resizeIM2D(MRimage,self.getSignalKSpaceSize())
+        return MRimage
+    
+class cm2DReconmSense(cm2DReconSense):
+    
+    def __init__(self):
+        super().__init__()
+        self.AutocalibrationP=0
+
+
+class cm2DGfactorSense(cm2DGfactorSense):
+    def __init__(self):
+        super().__init__()
+        self.AutocalibrationP=0
+
+
+class cm2DKellmanmSense(cm2DKellmanSense):
+    def __init__(self):
+        super().__init__()
+        self.AutocalibrationP=0
 
 class cm2DSignalToNoiseRatio(cm.cmOutput):
     def __init__(self, message=None):
@@ -511,6 +718,10 @@ class cm2DSignalToNoiseRatio(cm.cmOutput):
         self.Type = "MR"
         self.SubType = ""
 
+
+
+
+##MR PMR
 
 def resetASPMR(self):
     self.SignalPrewhitened.reset()
