@@ -4,7 +4,7 @@ from pynico_eros_montin import pynico as pn
 import numpy as np
 import scipy
 
-VERSION ='1.5'
+VERSION ='1.6'
 
 def printInfo():
     print('cloudmrhub {VERSION}')

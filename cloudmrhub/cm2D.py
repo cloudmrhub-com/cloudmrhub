@@ -696,7 +696,7 @@ class cm2DReconmSense(cm2DReconSense):
         self.AutocalibrationP=0
 
 
-class cm2DGfactorSense(cm2DGfactorSense):
+class cm2DGfactormSense(cm2DGfactorSense):
     def __init__(self):
         super().__init__()
         self.AutocalibrationP=0
@@ -707,6 +707,11 @@ class cm2DKellmanmSense(cm2DKellmanSense):
         super().__init__()
         self.AutocalibrationP=0
 
+
+
+
+
+##MR PMR
 class cm2DSignalToNoiseRatio(cm.cmOutput):
     def __init__(self, message=None):
         super().__init__(message)
@@ -717,11 +722,6 @@ class cm2DSignalToNoiseRatio(cm.cmOutput):
         self.SNR = None
         self.Type = "MR"
         self.SubType = ""
-
-
-
-
-##MR PMR
 
 def resetASPMR(self):
     self.SignalPrewhitened.reset()

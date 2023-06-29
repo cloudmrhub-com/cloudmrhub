@@ -26,7 +26,7 @@ N=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
 FA=1
 PA=2
 ACL=20
-L=cm2D.cm2DReconSense()
+L=cm2D.cm2DReconmSense()
 L.AccelerationF=FA
 L.AccelerationP=PA
 
@@ -44,7 +44,7 @@ plt.title('recon')
 
 
 # transform in Kellman!!!
-L.__class__=cm2D.cm2DKellmanSense
+L.__class__=cm2D.cm2DKellmanmSense
 
 plt.figure()
 plt.imshow(np.abs(L.getOutput()))
@@ -52,7 +52,7 @@ plt.colorbar()
 plt.title('SNR')
 
 # transform in Kellman!!!
-L.__class__=cm2D.cm2DGfactorSense
+L.__class__=cm2D.cm2DGfactormSense
 
 plt.figure()
 plt.imshow(np.abs(L.getOutput()))
