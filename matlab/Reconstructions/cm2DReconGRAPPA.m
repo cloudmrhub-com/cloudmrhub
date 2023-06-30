@@ -225,7 +225,7 @@ krecon = zeros(nf+2*dx,np+2*dy+1,nc);
 
 % Available undersampled data are copied into zero-padded matrix
 
-krecon(dx+1:end-dx,dy+1:R:np+dy,:) = rawdata; 
+    krecon(dx+1:end-dx,dy+1:R:np+dy,:) = rawdata; 
 
 for irow = dx+1:nf+dx
     for icol= 1:R:np
@@ -234,7 +234,7 @@ for irow = dx+1:nf+dx
         krecon(irow,icol+dy+1:icol+dy+R-1,:)=reshape(ws*src,[(R-1) nc]);
     end
 end
-% remove the extra borders of k-spae
+% remove the extra borders of k-space
 krecon = krecon(dx+1:nf+dx,dy+1:np+dy,:);
 
 %% IMAGE RECONSTRUCTION STEP %%

@@ -708,6 +708,74 @@ class cm2DKellmanmSense(cm2DKellmanSense):
         self.AutocalibrationP=0
 
 
+class cm2DReconGrappa(cm2DReconWithSensitivityAutocalibrated):
+    """Grappa REconstruction
+    Args:
+        cm2DReconWithSensitivityAutocalibrated (_type_): _description_
+    """
+    def __init__(self):
+        super().__init__()
+        self.HasSensitivity=False
+        self.GrappaKernel=[3,2]
+        self.PrewhitenedSignalKspaceACL=cm.k2d()
+        # delattr(self,'AccelerationF')
+        self.reconstructor=cm2DReconRSS()
+
+    
+    def getPrewhitenedSignalACL(self):
+        """
+        Gets the prewhitened signalACL.
+
+        Returns:
+            np.ndarray(f,p,c): prewhitened signal
+        """
+        if self.PrewhitenedSignalKspaceACL.isEmpty():
+             
+            if self.SignalPrewhitened.isEmpty():
+                S=cm.prewhiteningSignal(self.getSignalKSpace(), self.getNoiseCovariance())
+                self.SignalPrewhitened.set(S)
+            else:
+                S=self.getPrewhitenedSignal()
+            ACL = cm.getAutocalibrationsLines2DKSpace(S,self.AutocalibrationF,self.AutocalibrationP)
+            self.PrewhitenedSignalKspaceACL.set(ACL)
+            return ACL
+        else:
+            return self.PrewhitenedSignalKspaceACL.get()
+
+
+
+    def setGrappaKernel(self,GK):
+        L=[np.mod(a,2) for a in GK]
+        if ((L[0]) and (not L[1])):
+                self.GrappaKernel=GK
+        else:
+            raise Exception('Grappa Kernel must be [odd, even]')
+    
+    def getR(this):
+        SS = this.getSignalKSpaceSize()
+        R = this.AccelerationP
+        np = SS[1]
+
+        if np % R != 0:
+            tempR = R
+            while np % tempR != 0:
+                tempR -= 1
+            R = tempR
+            ss = f'Acceleration R reduced to {R} ' \
+                f', so the number of lines can be exactly divided by R'
+            print(ss)
+        return R
+
+
+    def getOutput(self):
+        grappa_kernel=self.GrappaKernel
+        data_acs=self.getPrewhitenedSignalACL()
+        pw_signalrawdata=self.getPrewhitenedSignal(); 
+        K=cm.getGRAPPAKspace(pw_signalrawdata,data_acs,grappa_kernel)
+        # R=self.recon()
+        R=self.reconstructor
+        R.setPrewhitenedSignal(K)
+        return R.getOutput()
 
 
 

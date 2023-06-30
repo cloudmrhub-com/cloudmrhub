@@ -4,7 +4,11 @@ from pynico_eros_montin import pynico as pn
 import numpy as np
 import scipy
 
-VERSION ='1.6'
+VERSION ='2'
+
+import pygrappa
+def getGRAPPAKspace(rawdata, acs, ksize):
+    return pygrappa.grappa(rawdata, acs, kernel_size=ksize)
 
 def printInfo():
     print('cloudmrhub {VERSION}')
@@ -490,6 +494,54 @@ def getAutocalibrationsLines2DKSpaceZeroPadded(K,AutocalibrationF,Autocalibratio
             OK[_x,_y]=K[_x,_y]
     return OK
 
+def getAutocalibrationsLines2DKSpaceZeroPadded(K,AutocalibrationF,AutocalibrationP):
+    """return a 2D multicoil Kspace data zeropadded with inside the KSpace in the ACL
+
+    Args:
+        K (nd.array(f,p,c)): Kspace
+        AutocalibrationF (int): Number of Autocalibration in the Frequency
+        AutocalibrationP (int): Number of Autocalibration in the Phase
+    Returns:
+        OK: np.array([f,p,c])
+    """
+    return getAutocalibrationsLines2DKSpace(K,AutocalibrationF,AutocalibrationP,padded=True)
+
+def getAutocalibrationsLines2DKSpace(K,AutocalibrationF,AutocalibrationP):
+    """return a 2D multicoil Kspace data zeropadded with inside the KSpace in the ACL
+
+    Args:
+        K (nd.array(f,p,c)): Kspace
+        AutocalibrationF (int): Number of Autocalibration in the Frequency
+        AutocalibrationP (int): Number of Autocalibration in the Phase
+    Returns:
+        OK: np.array([fac,pac,c])
+    """
+    return getAutocalibrationsLines2DKSpace(K,AutocalibrationF,AutocalibrationP,padded=False)
+
+def getAutocalibrationsLines2DKSpace(K,AutocalibrationF,AutocalibrationP,padded=True):
+    """return a 2D multicoil Kspace data zeropadded with inside the KSpace in the ACL
+
+    Args:
+        K (nd.array(f,p,c)): Kspace
+        AutocalibrationF (int): Number of Autocalibration in the Frequency
+        AutocalibrationP (int): Number of Autocalibration in the Phase
+    Returns:
+        OK: np.array([f,p,c])
+    """
+    x,y=getACLGrids(K,AutocalibrationF,AutocalibrationP)
+    OK=np.zeros_like(K)
+    for _x in x:
+        for _y in y:
+            OK[_x,_y]=K[_x,_y]
+
+    if padded:
+        return OK
+
+    else:
+        return OK[np.min(_x):np.max(_x),np.min(_y):np.max(_y)]
+        
+
+
 
 def resizeIM2D(IM,new_size):
     """resize a 2d image on the new size
@@ -591,7 +643,7 @@ def undersample2DDatamSENSE(K, frequencyacceleration=1,phaseacceleration=1,phase
 
 
 def undersample2DDatamGRAPPA(K, frequencyacceleration=1,phaseacceleration=1,frequencyACL=1,phaseACL=1):
-    x,y=getACLANDUndersampleGrids(K,1,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration,frequencyautocalibration=frequencyACL,phaseautocalibration=phaseACL)
+    x,y=getACLANDUndersampleGrids(K,frequencyacceleration=frequencyacceleration,phaseacceleration=phaseacceleration,frequencyautocalibration=frequencyACL,phaseautocalibration=phaseACL)
     OK=np.zeros((K.shape),dtype=complex)
     for _x in x:
         for _y in y:

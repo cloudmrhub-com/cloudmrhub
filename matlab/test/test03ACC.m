@@ -34,7 +34,7 @@ SOSR=1; %sumofsquare
 
 %SENSE
 TITLE='SENSE ' ;
-RE=cm2DGFactorSENSE()
+RE=cm2DReconSENSE();
 ACCK=RE.mimicmSenseDataFromFullysampledZeroPadded(S,R1,R2,ACL);
 RE.setSignalKSpace(ACCK)
 RE.setNoiseKSpace(N)
