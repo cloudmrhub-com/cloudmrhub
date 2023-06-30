@@ -194,42 +194,43 @@ plt.show()
         [] Kellman
             [x] RSS v0
             [x] B1  v1
-            [] Sense v1.2
+            [x] Sense v2
 
         [ ] Pseudo Multiple Replicas 
             [x] RSS v1
             [x] B1  v1
-            [ ] Sense v1.2
-            [ ] Grappa v1.2
-            [ ] Adapt v1.3
+            [x] Sense v2
+            [x] Grappa v2
+            [ ] Adapt v3
 
         [ ] Pseudo Multiple Replicas Wien
             [x] RSS v1
             [x] B1 v1
-            [ ] Sense v1.2
-            [ ] Grappa v1.2
-            [ ] Adapt v1.3
+            [x] Sense v2
+            [x] Grappa v2
+            [ ] Adapt v3
             [ ] CompressSenseBart v2
 
     [ ] Recon
 
         [x] RSS v0
         [x] B1 v1
-        [ ] Sense v1.2
-        [ ] Grappa v1.2
-        [ ] Adapt v1.3
+        [x] Sense v2
+        [x] Grappa v2
+        [ ] Adapt v3
         [ ] Compress Sense Bart v2
 
     [ ] Coilsensitivity Maps:
 
         [x] Inner v1
-        [ ] Adapt v1.3
-        [ ] BodyCoil v1.3
+        [ ] Adapt v3
+        [ ] BodyCoil v3
         [ ] Espirit
     
 
 
-- v1.2: ()
+- v2:
+    - grappa (pygrappa), SENSE, mSENSE
 - v1:
     - recon RSS,B1
     - SNR Kellman, RSS,B1
