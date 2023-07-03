@@ -745,11 +745,8 @@ class cm2DReconGrappa(cm2DReconWithSensitivityAutocalibrated):
 
 
     def setGrappaKernel(self,GK):
-        L=[np.mod(a,2) for a in GK]
-        if ((L[0]) and (not L[1])):
-                self.GrappaKernel=GK
-        else:
-            raise Exception('Grappa Kernel must be [odd, even]')
+        self.GrappaKernel=GK
+        
     
     def getR(this):
         SS = this.getSignalKSpaceSize()
