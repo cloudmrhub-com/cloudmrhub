@@ -9,7 +9,7 @@ pip install git+https://github.com/cloudmrhub-com/CMRCode.git
 
 # Suggestions
 ```
-#create an nevironment 
+#create an environment 
 python3 -m venv CMT
 source CMT/bin/activate
 pip install git+https://github.com/cloudmrhub-com/CMRCode.git
