@@ -436,7 +436,7 @@ class cm2DReconB1(cm2DReconWithSensitivity):
         """
         super().__init__()
         self.HasAcceleration= False
-        self.HasSensitivity=False
+        self.HasSensitivity=True
         
     def getOutput(self):
         img_matrix = self.get2DKSIFFT()
@@ -472,14 +472,6 @@ class cm2DKellmanB1(cm2DReconB1):
         This work was supported in part by the National Institute of Biomedical Imaging and Bioengineering (NIBIB) of the National Institutes of Health under Award Number R01 EB024536 and P41 EB017183. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
     """
     
-    def __init__(self):
-        """
-        Initializes the RSS reconstruction.
-        
-        """
-        super().__init__()
-        self.HasAcceleration= False
-        self.HasSensitivity=False
     def getOutput(self):
         img_matrix = self.get2DKSIFFT()
         pw_sensmap=self.getCoilSensitivityMatrix()

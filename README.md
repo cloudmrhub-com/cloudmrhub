@@ -190,45 +190,41 @@ plt.colorbar()
 plt.show()
 ```
 # Roadmap
-    [] SNR
-        [] Kellman
+    [x] SNR
+        [x] Kellman
             [x] RSS v0
             [x] B1  v1
             [x] Sense v2
 
-        [ ] Pseudo Multiple Replicas 
+        [x] Pseudo Multiple Replicas 
             [x] RSS v1
             [x] B1  v1
             [x] Sense v2
             [x] Grappa v2
-            [ ] Adapt v3
 
-        [ ] Pseudo Multiple Replicas Wien
+        [x] Pseudo Multiple Replicas Wien
             [x] RSS v1
             [x] B1 v1
             [x] Sense v2
             [x] Grappa v2
-            [ ] Adapt v3
-            [ ] CompressSenseBart v2
 
-    [ ] Recon
+    [x] Recon
 
         [x] RSS v0
         [x] B1 v1
         [x] Sense v2
         [x] Grappa v2
-        [ ] Adapt v3
-        [ ] Compress Sense Bart v2
+        
 
     [ ] Coilsensitivity Maps:
 
         [x] Inner v1
-        [ ] Adapt v3
         [ ] BodyCoil v3
         [ ] Espirit
     
 
-
+- v3:
+    - fields SNR
 - v2:
     - grappa (pygrappa), SENSE, mSENSE
 - v1:
