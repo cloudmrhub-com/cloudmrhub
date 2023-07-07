@@ -3,7 +3,7 @@
 
 # Installation
 ```
-pip install git+https://github.com/cloudmrhub-com/CMRCode.git
+pip install git+https://github.com/cloudmrhub-com/cloudmrhub.git
 
 ```
 
@@ -12,10 +12,10 @@ pip install git+https://github.com/cloudmrhub-com/CMRCode.git
 #create an environment 
 python3 -m venv CMT
 source CMT/bin/activate
-pip install git+https://github.com/cloudmrhub-com/CMRCode.git
+pip install git+https://github.com/cloudmrhub-com/cloudmrhub.git
 ```
 # Example
-Examples can be found in the [git test directoy](https://github.com/cloudmrhub-com/CMRCode/tree/main/cloudmrhub/test)
+Examples can be found in the [git test directoy](https://github.com/cloudmrhub-com/cloudmrhub/tree/main/cloudmrhub/test)
 
 The codes reads a signal and a noise kspace from siemens scanner and computes reconstructions and snr for RSS and B1
 
@@ -88,7 +88,11 @@ plt.title('RSS SNR')
 
 
 
-L=cm2DReconB1()
+L=cm2DReconB1()                NN=np.sqrt(S.shape[-1])
+    plt.subplot(int(NN),int(NN),t+1)
+    plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
+    plt.title(f'Coil {t}')
+
 L.setSignalKSpace(S)
 L.setNoiseKSpace(N)
 L.setCoilSensitivityMatrixSource(S)

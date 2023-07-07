@@ -551,8 +551,7 @@ class cm2DReconSense(cm2DReconWithSensitivityAutocalibrated):
     """
     def __init__(self):
         super().__init__()
-        delattr(self,'AutocalibrationF')
-        delattr(self,'AutocalibrationP')
+  
 
     def setAutocalibrationLines(self,ACL):
         [nf,_]=self.getSignalKSpaceSize()
