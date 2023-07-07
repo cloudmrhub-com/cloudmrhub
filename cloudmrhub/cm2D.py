@@ -1,8 +1,8 @@
 import numpy as np
 try:
-    import cm
+    import cm #dev
 except:
-    import cloudmrhub.cm as cm
+    import cloudmrhub.cm as cm #runtime
     
 import matplotlib.pyplot as plt
 import scipy
@@ -443,7 +443,7 @@ class cm2DReconB1(cm2DReconWithSensitivity):
         pw_sensmap=self.getCoilSensitivityMatrix()
         invRn=self.getInverseNoiseCovariancePrewhitened()
         nf,nph =self.getSignalKSpaceSize()
-        im = np.zeros((nf,nph))
+        im = np.zeros((nf,nph),dtype=pw_sensmap.dtype)
         for irow in range(nf):
             for icol in range(nph):
                         s_matrix=pw_sensmap[irow,icol,:]
@@ -516,6 +516,10 @@ class cm2DReconWithSensitivityAutocalibrated(cm2DReconWithSensitivity):
         self.AccelerationF =0
         self.AccelerationP=0
 
+    def setAutocalibrationLines(self,ACL):
+        self.AutocalibrationF=ACL[0]
+        self.AutocalibrationP=ACL[1]
+
     def getCoilSensitivityMatrixSimpleSenseACL(self):
         # MASK 
         if self.CoilSensitivityMatrix.isEmpty():       
@@ -549,7 +553,12 @@ class cm2DReconSense(cm2DReconWithSensitivityAutocalibrated):
         super().__init__()
         delattr(self,'AutocalibrationF')
         delattr(self,'AutocalibrationP')
-    
+
+    def setAutocalibrationLines(self,ACL):
+        [nf,_]=self.getSignalKSpaceSize()
+        self.AutocalibrationF=nf
+        self.AutocalibrationP=ACL[1]
+
     def undersamplerZeroPadded(self,k):
         return cm.undersample2DDataSENSE(k,self.AccelerationF,self.AccelerationP)
 
