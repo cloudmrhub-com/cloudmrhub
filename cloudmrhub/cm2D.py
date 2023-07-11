@@ -661,7 +661,7 @@ class cm2DGfactorSense(cm2DKellmanSense):
         pw_signalrawdata=self.getPrewhitenedSignal()     
         k_temp = self.undersamplerZeroPadded(pw_signalrawdata)
         pw_sensmap=self.getCoilSensitivityMatrix()
-        MRimage = np.zeros((nf, nph),dtype=complex)
+        MRimage = np.zeros((nf, nph))
         _c=np.sqrt(2.0)
         for irow in range(nf // R1):
             for icol in range(nph//R2):
