@@ -683,7 +683,7 @@ class cm2DGfactorSense(cm2DKellmanSense):
                 U=np.reshape(u,(current_R1,current_R2),order='F')
                 for i,_x in enumerate(r1):
                     for j,_y in enumerate(r2):
-                        MRimage[_x,_y] = _c*U[i,j]
+                        MRimage[_x,_y] = np.abs(_c*U[i,j])
 
         if (cm.needs_regridding(self.getSignalKSpace(),R1,R2)):
             MRimage=cm.resizeIM2D(MRimage,self.getSignalKSpaceSize())
