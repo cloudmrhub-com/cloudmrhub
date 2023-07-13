@@ -511,6 +511,7 @@ class cm2DReconWithSensitivityAutocalibrated(cm2DReconWithSensitivity):
         super().__init__()
         self.HasAcceleration= True
         self.HasSensitivity=True
+        self.HasAutocalibration=True
         self.AutocalibrationF =None
         self.AutocalibrationP =None
         self.AccelerationF =0
@@ -551,6 +552,7 @@ class cm2DReconSense(cm2DReconWithSensitivityAutocalibrated):
     """
     def __init__(self):
         super().__init__()
+        self.HasAutocalibration=False
   
 
     def setAutocalibrationLines(self,ACL):
