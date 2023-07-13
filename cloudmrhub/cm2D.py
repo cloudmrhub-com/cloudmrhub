@@ -47,6 +47,7 @@ class cm2DRecon(cm.cmOutput):
         self.SignalPrewhitened = cm.k2d()
         self.HasSensitivity = False
         self.HasAcceleration = False
+        self.HasAutocalibration = False
         self.NoiseBandWidth = None
 
     def setSignalKSpace(self, signalKSpace):
