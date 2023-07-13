@@ -4,7 +4,7 @@ from pynico_eros_montin import pynico as pn
 import numpy as np
 import scipy
 
-VERSION ='2.4'
+VERSION ='2.5'
 
 import pygrappa
 def getGRAPPAKspace(rawdata, acs, ksize):
