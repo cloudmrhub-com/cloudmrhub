@@ -697,6 +697,7 @@ class cm2DReconmSense(cm2DReconSense):
     def __init__(self):
         super().__init__()
         self.AutocalibrationP=0
+        self.HasAutocalibration=True
 
 
 class cm2DGfactormSense(cm2DGfactorSense):
