@@ -493,7 +493,7 @@ def get_noise_for(file):
 	
 import scipy
 def savemat(fn,var):
-    scipy.io.savemat(fn, {"var":var})
+    scipy.io.savemat(fn, {"export":var})
 
 
 import matplotlib.pyplot as plt
