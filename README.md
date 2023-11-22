@@ -72,14 +72,14 @@ im=L.getOutput()
 
 import matplotlib.pyplot as plt
 
-plt.imshow(im)
+plt.imshow(np.abs(im))
 plt.colorbar()
 plt.title('RSS Recon')
 
 L=cm2DKellmanRSS()
 L.setSignalKSpace(S)
 L.setNoiseKSpace(N)
-snr=L.getOutput()
+snr=np.abs(L.getOutput())
 
 
 plt.imshow(snr)
@@ -88,54 +88,20 @@ plt.title('RSS SNR')
 
 
 
-L=cm2DReconB1()                NN=np.sqrt(S.shape[-1])
-    plt.subplot(int(NN),int(NN),t+1)
-    plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
-    plt.title(f'Coil {t}')
-
-L.setSignalKSpace(S)
-L.setNoiseKSpace(N)
-L.setCoilSensitivityMatrixSource(S)
-L.setCoilSensitivityMatrixCalculationMethod('inner')
-for t in range(S.shape[-1]):
-    NN=np.sqrt(S.shape[-1])
-    plt.subplot(int(NN),int(NN),t+1)
-    plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
-    plt.title(f'Coil {t}')
-
-plt.figure()
-plt.imshow(L.getOutput())
-plt.title('B1 Recon')
-
-L=cm2DKellmanB1()
-L.setSignalKSpace(S)
-L.setNoiseKSpace(N)
-L.setCoilSensitivityMatrixSource(S)
-L.setCoilSensitivityMatrixCalculationMethod('inner')
-plt.figure()
-plt.imshow(L.getOutput())
-plt.colorbar()
-plt.title('SNR B1')
-
-
-
-
-plt.show()
 ```
 
 
 
 # Example SNR
 ```
-import cloudmrhub.cm2D as cm2D
-import twixtools
 import numpy as np
+import cloudmrhub.cm2D as cm2D
+
 import matplotlib.pyplot as plt
+import  twixtools
 
-
-import sys
-s= sys.argv[1]
-n=sys.argv[2]
+s='cloudmrhub/data/meas_MID00024_FID188178_Multislice.dat'
+n='cloudmrhub/data/meas_MID00027_FID188181_Multislice_no_RF.dat'
 
 twix=twixtools.map_twix(s)
 im_array = twix[0]['image']
@@ -160,13 +126,14 @@ L.setSignalKSpace(S)
 L2.reconstructor=L
 
 plt.subplot(221)
-plt.imshow(L2.getOutput(),vmax=250)
+plt.imshow(np.abs(L2.getOutput()))
+plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
 plt.title('PMR')
-plt.colorbar()
 
-R2=cm2D.cm2DSignalToNoiseRatioPseudoMultipleReplicasWen()
+
+R2=cm2D.cm2DSignalToNoiseRatioPseudoMultipleReplicasWein()
 R=cm2D.cm2DReconRSS()
-R2.numberOfReplicas=5
+R2.numberOfReplicas=3
 R2.boxSize=10
 R.setNoiseKSpace(N)
 R.setSignalKSpace(S)
@@ -174,21 +141,24 @@ R2.reconstructor=R
 
 
 
-
-
-
 plt.subplot(222)
-plt.imshow(R2.getOutput(),vmax=250)
+plt.imshow(np.abs(R2.getOutput()))
+plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
 plt.title('CR')
-plt.colorbar()
+
 
 R=cm2D.cm2DKellmanRSS()
 R.setNoiseKSpace(N)
 R.setSignalKSpace(S)
 plt.subplot(223)
-plt.imshow(R.getOutput(),vmax=250)
+plt.imshow(np.abs(R.getOutput()))
+plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
 plt.title('Kellman')
-plt.colorbar()
+
+plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
+plt.colorbar(plt.gcf().axes[0].images[0], ax=plt.gcf().axes)
+# add a title for the figure
+plt.suptitle("SNR", fontsize=16)
 
 
 plt.show()
@@ -196,47 +166,39 @@ plt.show()
 # Roadmap
     [x] SNR
         [x] Kellman
-            [x] RSS v0
-            [x] B1  v1
-            [x] Sense v2
+            [x] RSS
+            [x] B1
+            [x] Sense
 
         [x] Pseudo Multiple Replicas 
-            [x] RSS v1
-            [x] B1  v1
-            [x] Sense v2
-            [x] Grappa v2
+            [x] RSS
+            [x] B1
+            [x] Sense
+            [x] Grappa
 
         [x] Pseudo Multiple Replicas Wien
-            [x] RSS v1
-            [x] B1 v1
-            [x] Sense v2
-            [x] Grappa v2
+            [x] RSS
+            [x] B1
+            [x] Sense
+            [x] Grappa
+
+        [ ] Multiple Replicas
 
     [x] Recon
 
-        [x] RSS v0
-        [x] B1 v1
-        [x] Sense v2
-        [x] Grappa v2
+        [x] RSS
+        [x] B1
+        [x] Sense
+        [x] Grappa
         
 
     [ ] Coilsensitivity Maps:
 
-        [x] Inner v1
-        [ ] BodyCoil v3
+        [x] Inner
+        [x] BodyCoil
         [ ] Espirit
     
 
-- v3:
-    - fields SNR
-- v2:
-    - grappa (pygrappa), SENSE, mSENSE
-- v1:
-    - recon RSS,B1
-    - SNR Kellman, RSS,B1
-    - SNR Pseudo MR  RSS,B1
-- v0
-    - recon RSS
 
 # Cite Us
 
