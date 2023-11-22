@@ -817,7 +817,7 @@ class cm2DReconSENSEv1(cm2DReconSENSE):
     def getOutput(self):
         return sense1d(self.getPrewhitenedSignal(),self.getCoilSensitivityMatrix(), Ry=self.Acceleration, coil_axis=-1,imspace=False)
     
-class cm2DReconSENSEv2(cm2DReconSENSE):
+class cm2DReconCGSENSE(cm2DReconSENSE):
     def getOutput(self):
         return cgsense(self.getPrewhitenedSignal(),self.getCoilSensitivityMatrix(), coil_axis=-1)
 
