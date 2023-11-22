@@ -1,4 +1,4 @@
-from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS, cm2DKellmanB1,cm2DReconB1
+from cloudmrhub.cm2D import cm2DKellmanRSS, cm2DReconRSS, cm2DKellmanB1,cm2DReconB1,cm2DReconSENSE,cm2DKellmanSENSE,cm2DGFactorSENSE,cm2DReconGRAPPA
 import cloudmrhub.cm as cm
 
 import twixtools
@@ -23,76 +23,68 @@ im_array.flags['average']['Rep'] = False  # average all repetitions
 im_array.flags['average']['Ave'] = False # average all repetitions
 N=np.transpose(im_array[0,0,0,0,0,0,0,0,0,0,0,0,0,:,:,:],[2,0,1])
 
-# N=N[0:2,0:3,0:4]
-# S=S[0:2,0:3,0:4]
 
 
-
-L=cm2DReconRSS()
+L=cm2DKellmanRSS()
 L.setSignalKSpace(S)
 L.setNoiseKSpace(N)
-
 NBW=L.getNoiseBandWidth()
-print(NBW)
 nc2=L.getNoiseCovariance()
 plt.figure()
+plt.subplot(121)
 plt.imshow(np.abs(nc2))
 plt.colorbar()
 plt.title(f'Noise Covariance Matrix BW:{NBW:03f}')
+
+plt.subplot(122)
+plt.imshow(np.abs(L.getNoiseCovarianceCoefficients()))
+plt.colorbar()
+plt.title(f'Noise Coefficient Matrix BW:{NBW:03f}')
+
 p=L.getPrewhitenedSignal()
 plt.figure()
 plt.imshow(np.abs(p[:,:,0]))
 plt.colorbar()
 plt.title('Prewhitened Kspace First Coil')
 
-
-
 im=L.getOutput()
-
 import matplotlib.pyplot as plt
-
-plt.imshow(im)
-plt.colorbar()
-plt.title('RSS Recon')
-
-L=cm2DKellmanRSS()
-L.setSignalKSpace(S)
-L.setNoiseKSpace(N)
-snr=L.getOutput()
-
-
-plt.imshow(snr)
+plt.figure()
+plt.imshow(np.abs(im))
 plt.colorbar()
 plt.title('RSS SNR')
 
 
-
-L=cm2DReconB1()
-L.setSignalKSpace(S)
-L.setNoiseKSpace(N)
-L.setCoilSensitivityMatrixSource(S)
-L.setCoilSensitivityMatrixCalculationMethod('inner')
-for t in range(S.shape[-1]):
-    NN=np.sqrt(S.shape[-1])
-    plt.subplot(int(NN),int(NN),t+1)
-    plt.imshow(np.abs(cm.calculate_simple_sense_sensitivitymaps(S,'ref')[:,:,t]))
-    plt.title(f'Coil {t}')
-
-plt.figure()
-plt.imshow(L.getOutput())
-plt.title('B1 Recon')
-
 L=cm2DKellmanB1()
 L.setSignalKSpace(S)
 L.setNoiseKSpace(N)
-L.setCoilSensitivityMatrixSource(S)
-L.setCoilSensitivityMatrixCalculationMethod('inner')
+L.setReferenceKSpace(S)
+
+L.prepareCoilSensitivityMatrixPlot(title='B1 Coil Sensitivity Maps')
+
 plt.figure()
-plt.imshow(L.getOutput())
+plt.imshow(np.abs(L.getOutput()))
 plt.colorbar()
 plt.title('SNR B1')
 
 
+# acceleration frequency and phase
+FA=1
+PA=2
+# autocalibrationlines
+ACL=20
+L=cm2DKellmanSENSE()
+L.setAcceleration([FA,PA])
+US,REF=cm.mimicAcceleration2D(S,[FA,PA],ACL=[np.nan,ACL])
 
+L.setSignalKSpace(US)
+L.setNoiseKSpace(N)
+L.setReferenceKSpace(REF)
+L.setAutocalibrationLines(ACL)
 
+L.prepareCoilSensitivityMatrixPlot(title='SENSE Coil Sensitivity Maps')
+#get the current title
+plt.figure()
+plt.imshow(np.abs(L.getOutput()))
+plt.title('SNR Sense')
 plt.show()

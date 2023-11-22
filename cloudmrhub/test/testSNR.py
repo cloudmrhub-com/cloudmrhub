@@ -30,13 +30,14 @@ L.setSignalKSpace(S)
 L2.reconstructor=L
 
 plt.subplot(221)
-plt.imshow(L2.getOutput(),vmax=250)
+plt.imshow(np.abs(L2.getOutput()))
+plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
 plt.title('PMR')
-plt.colorbar()
 
-R2=cm2D.cm2DSignalToNoiseRatioPseudoMultipleReplicasWen()
+
+R2=cm2D.cm2DSignalToNoiseRatioPseudoMultipleReplicasWein()
 R=cm2D.cm2DReconRSS()
-R2.numberOfReplicas=5
+R2.numberOfReplicas=3
 R2.boxSize=10
 R.setNoiseKSpace(N)
 R.setSignalKSpace(S)
@@ -44,21 +45,24 @@ R2.reconstructor=R
 
 
 
-
-
-
 plt.subplot(222)
-plt.imshow(R2.getOutput(),vmax=250)
+plt.imshow(np.abs(R2.getOutput()))
+plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
 plt.title('CR')
-plt.colorbar()
+
 
 R=cm2D.cm2DKellmanRSS()
 R.setNoiseKSpace(N)
 R.setSignalKSpace(S)
 plt.subplot(223)
-plt.imshow(R.getOutput(),vmax=250)
+plt.imshow(np.abs(R.getOutput()))
+plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
 plt.title('Kellman')
-plt.colorbar()
+
+plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
+plt.colorbar(plt.gcf().axes[0].images[0], ax=plt.gcf().axes)
+# add a title for the figure
+plt.suptitle("SNR", fontsize=16)
 
 
 plt.show()

@@ -30,7 +30,7 @@ ACLF=20
 ACLP=20
 GK=[3,2]
 
-L=cm2D.cm2DReconGrappa()
+L=cm2D.cm2DReconGRAPPA()
 L.AccelerationF=FA
 L.AccelerationP=PA
 L.AutocalibrationF=ACLF
