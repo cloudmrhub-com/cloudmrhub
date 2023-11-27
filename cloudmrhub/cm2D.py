@@ -401,6 +401,8 @@ class cm2DReconWithSensitivity(cm2DRecon):
             Rn = self.getNoiseCovariance()
             pw_S = cm.prewhiteningSignal(S, Rn)
             self.setPrewhitenedReferenceKSpace(pw_S)
+        else:
+            pw_S = self.PrewhitenedReferenceKSpace.get()
         return pw_S
 
     def setReferenceKSpace(self, IM):
@@ -947,8 +949,11 @@ class cm2DSignalToNoiseRatioMultipleReplicas(cm2DSignalToNoiseRatio):
         add a stack of 2D images to the class
         """
         self.add2DImage(x)
-        # for t in range(x.shape[2]):
-            # self.add2DImage(x[:, :, t])
+
+    def setSignalKSpace(self,signal):
+        self.reconstructor.setSignalKSpace(signal)
+        self.add2DImage(self.reconstructor.getOutput())
+        
     def add2DKspace(self,signal):        
         self.reconstructor.setSignalKSpace(signal)
         self.add2DImage(self.reconstructor.getOutput())

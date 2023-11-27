@@ -16,8 +16,6 @@ S=np.transpose(im_array[0,0,0,0,0,0,0,:,0,0,0,SL,0,:,:,:],[0,3,1,2])
 
 
 
-
-
 L=cm2D.cm2DSignalToNoiseRatioMultipleReplicas()
 L.reconstructor=cm2D.cm2DReconRSS()
 for r in range(S.shape[-1]):
