@@ -612,10 +612,10 @@ try:
 except:
     import cloudmrhub.espirit as espirit
     
-def sensitivitiesEspirit2D(ref, k=6, r=20,t=0.01, c=0.1,debug=False):
+def sensitivitiesEspirit2D(ref, k=6, r=20,t=0.01, c=0.9925,debug=False):
     squeeze=False
     if len(ref.shape)<4:
-        ref = np.expand_dims(ref,axis=2)
+        ref = np.expand_dims(ref,axis=0)
         squeeze=True
     # Derive ESPIRiT operator
     esp = espirit.espirit(ref, k, r, t,c)

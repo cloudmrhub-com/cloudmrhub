@@ -368,10 +368,10 @@ class cm2DReconWithSensitivity(cm2DRecon):
 
     def setNoMask(self):
         self.setMaskCoilSensitivityMatrix(False)
-    def setMaskCoilSensitivityMatrixBasedOnEspirit(self):
-        SENS=cm.sensitivitiesEspirit2D(self.getPrewhitenedReferenceKSpace())
+    def setMaskCoilSensitivityMatrixBasedOnEspirit(self,k=4,r=12,t=0.01,c=0.997):
+        SENS=cm.sensitivitiesEspirit2D(self.getReferenceKSpace(),k=k,r=r,t=t,c=c)
         SENS=np.squeeze(SENS)
-        self.setMaskCoilSensitivityMatrix(abs(SENS[...,0])>0)
+        self.setMaskCoilSensitivityMatrix(abs(SENS[...])>0)
     
     def setMaskCoilSensitivityMatrixDefault(self):
         self.setMaskCoilSensitivityMatrix('reference')
