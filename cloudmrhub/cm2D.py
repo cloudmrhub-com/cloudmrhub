@@ -881,7 +881,7 @@ class cm2DReconGRAPPA(cm2DReconWithSensitivityAutocalibrated):
         data_acs=self.getPrewhitenedReferenceKSpaceACL()
         pw_signalrawdata=self.getPrewhitenedSignal(); 
         K=cm.getGRAPPAKspace(pw_signalrawdata,data_acs,grappa_kernel)
-   
+        K=self.checkKSpacePixelType(K)
         R=self.reconstructor
         R.setPrewhitenedSignal(K)
         return R.getOutput()

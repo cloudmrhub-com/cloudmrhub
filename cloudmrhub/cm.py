@@ -7,12 +7,14 @@ import scipy
 VERSION ='1'
 
 import pygrappa
+
 def getGRAPPAKspace(rawdata, acs, ksize):
     """_summary_
     acs: [acl,acl,c]
     ksize: [kx,ky]
     """
-    return pygrappa.cgrappa(rawdata, acs, kernel_size=ksize)
+    return pygrappa.cgrappa(rawdata.astype(np.complex128), acs.astype(np.complex128), kernel_size=ksize)
+
 
 def printInfo():
     print('cloudmrhub {VERSION}')
