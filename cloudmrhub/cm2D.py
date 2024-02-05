@@ -373,10 +373,10 @@ class cm2DReconWithSensitivity(cm2DRecon):
             r=self.getSignalKSpaceSize()[1]//4
         SENS=cm.sensitivitiesEspirit2D(self.getReferenceKSpace(),k=k,r=r,t=t,c=c)
         SENS=np.squeeze(SENS)
-        MASK=SENS[...]>0
-        #fill the whole in the mask using scipy
-        MASK=scipy.ndimage.morphology.binary_fill_holes(MASK)
-        self.setMaskCoilSensitivityMatrix(np.abs(MASK))
+        MASK=np.abs(SENS[...])>0
+        #fill the whole in the mask using scipy and a 3x3 structure
+        MASK=scipy.ndimage.morphology.binary_fill_holes(MASK)  
+        self.setMaskCoilSensitivityMatrix(MASK)
     
     def setMaskCoilSensitivityMatrixDefault(self):
         self.setMaskCoilSensitivityMatrix('reference')
