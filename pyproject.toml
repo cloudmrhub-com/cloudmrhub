@@ -11,10 +11,7 @@ include = ["**/*.py"]
 [project]
 name = "cloudmrhub"
 version = "1.0.2.9"
-changes=[
-{"version":"1.0.2.9","changes":"sense map should be absolute values"},
-{"version":"1.0.2.8","changes":"added scipy for masking the coil sensitivity maps"}
-]
+changes= "CHANGES.md"
 authors = [
   { name="Dr. Eros Montin, PhD", email="eros.montin@gmail.com" },
 ]
