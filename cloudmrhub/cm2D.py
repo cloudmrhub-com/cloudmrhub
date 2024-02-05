@@ -368,7 +368,9 @@ class cm2DReconWithSensitivity(cm2DRecon):
 
     def setNoMask(self):
         self.setMaskCoilSensitivityMatrix(False)
-    def setMaskCoilSensitivityMatrixBasedOnEspirit(self,k=4,r=12,t=0.01,c=0.997):
+    def setMaskCoilSensitivityMatrixBasedOnEspirit(self,k=8,r=None,t=0.01,c=0.997):
+        if r is None:
+            r=self.getSignalKSpaceSize()[1]//4
         SENS=cm.sensitivitiesEspirit2D(self.getReferenceKSpace(),k=k,r=r,t=t,c=c)
         SENS=np.squeeze(SENS)
         self.setMaskCoilSensitivityMatrix(abs(SENS[...])>0)
@@ -810,7 +812,7 @@ class cm2DGFactorSENSE(cm2DReconSENSE):
                 U=np.reshape(u,(current_R1,current_R2),order='F')
                 for i,_x in enumerate(r1):
                     for j,_y in enumerate(r2):
-                        MRimage[_x,_y] = np.abs(_c*U[i,j])
+                        MRimage[_x,_y] = np.sqrt(np.abs(U[i,j]))
 
         if (cm.needs_regridding(self.getSignalKSpace(),[R1,R2])):
             MRimage=cm.resizeIM2D(MRimage,self.getSignalKSpaceSize())
