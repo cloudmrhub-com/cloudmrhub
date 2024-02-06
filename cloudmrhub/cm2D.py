@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import scipy
 from types import MethodType
 
+import pkg_resources
+
+
 class cm2DRecon(cm.cmOutput):
     """
     Python implementation of the cm2DRecon MATLAB class
@@ -374,9 +377,8 @@ class cm2DReconWithSensitivity(cm2DRecon):
             r=self.getSignalKSpaceSize()[1]//4
         SENS=cm.sensitivitiesEspirit2D(self.getReferenceKSpace(),k=k,r=r,t=t,c=c)
         SENS=np.squeeze(SENS)
-        MASK=np.abs(SENS[...])>0
-        MASK=scipy.ndimage.morphology.binary_fill_holes(MASK.sum(axis=-1))
-
+        MASK=np.abs(SENS.sum(axis=-1))>0
+        MASK=scipy.ndimage.morphology.binary_fill_holes(MASK)
         self.setMaskCoilSensitivityMatrix(MASK)
     
     def setMaskCoilSensitivityMatrixDefault(self):

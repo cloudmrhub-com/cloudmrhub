@@ -1,3 +1,7 @@
+# version:1.0.3.2
+package version
+# version:1.0.3.2
+debug for coils sensitivity maps mask
 # version:1.0.3.0
 sensitivity mask with espirit sum on last dimension, need resize fixed for complex numbers
 # version:1.0.2.10
