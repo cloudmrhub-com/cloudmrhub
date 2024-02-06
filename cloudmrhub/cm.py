@@ -595,7 +595,7 @@ def resizeIM2D(IM,new_size):
     Returns:
         _type_: _description_
     """
-    if np.iscomplex(IM[0,0]):
+    if isinstance(IM[0,0],complex):
         R=ima.numpyToImaginable(np.real(IM))
         I=ima.numpyToImaginable(np.imag(IM))
         R.changeImageSize(new_size)
@@ -616,16 +616,11 @@ except:
     import cloudmrhub.espirit as espirit
     
 def sensitivitiesEspirit2D(ref, k=6, r=24,t=0.01, c=0.9925,debug=False):
-    squeeze=False
-    if len(ref.shape)<4:
-        ref = np.expand_dims(ref,axis=0)
-        squeeze=True
-    # Derive ESPIRiT operator
+    #it's 2d so i have t add a new axis to the ref kspace
+    ref = np.expand_dims(ref,axis=0)
     esp = espirit.espirit(ref, k, r, t,c)
-
+    esp=np.squeeze(esp)
     if debug:
-        if squeeze:
-            esp=np.squeeze(esp)
         return esp
     else:
         return esp[...,0]
