@@ -16,16 +16,11 @@ def getGRAPPAKspace(rawdata, acs, ksize):
     return pygrappa.cgrappa(rawdata.astype(np.complex128), acs.astype(np.complex128), kernel_size=ksize)
 
 
-import pkg_resources
-def getPackageVersion(pkg='cloudmrhub'):
-    try:
-        return pkg_resources.get_distribution(pkg).version
-    except:
-        return None
+
 
 def getVersionInfo():
     PKG=['cloudmrhub','pynico_eros_montin','cmrawspy','pygrappa','twixtools','numpy','scipy','matplotlib','pydicom','SimpleITK','PIL','pyable_eros_montin'] 
-    return [{r:getPackageVersion(r)} for r in PKG]
+    return [{r:pn.getPackageVersion(r)} for r in PKG]
 class i2d:
     """
     A 2D image class to use in CloudMR
