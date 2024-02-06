@@ -339,12 +339,12 @@ def calculate_simple_sense_sensitivitymaps(K,mask=None):
     sensmap_temp = MRifft(K,[0,1])
     ref_img = np.sqrt(np.sum(np.abs(sensmap_temp)**2, axis=-1))
     coilsens_set = sensmap_temp / np.tile(np.expand_dims(ref_img,axis=-1), [1, 1, dims[2]])
-
+    sensmask=None
     if (mask is not False) and (mask is not None):
         D=len(K.shape)-1
         sensmask = calculateCoilsSensitivityMask(mask,ref_img,K.shape[-1],dimesion=D)
         coilsens_set = coilsens_set * sensmask
-    return coilsens_set
+    return coilsens_set, sensmask
 
 def get_wien_noise_image(noiseonly, box):
     """
@@ -595,7 +595,7 @@ def resizeIM2D(IM,new_size):
     Returns:
         _type_: _description_
     """
-    if isinstance(IM[0,0],complex):
+    if np.iscomplexobj(IM):
         R=ima.numpyToImaginable(np.real(IM))
         I=ima.numpyToImaginable(np.imag(IM))
         R.changeImageSize(new_size)

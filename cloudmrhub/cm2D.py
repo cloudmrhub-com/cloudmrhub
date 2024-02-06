@@ -364,7 +364,7 @@ class cm2DReconWithSensitivity(cm2DRecon):
         self.ReferenceKSpace=cm.k2d()
         self.PrewhitenedReferenceKSpace=cm.k2d()
         self.MaskCoilSensitivityMatrix='reference'
-
+        self.outputMask=cm.k2d()
 
     def setNoMask(self):
         self.setMaskCoilSensitivityMatrix(False)
@@ -390,8 +390,9 @@ class cm2DReconWithSensitivity(cm2DRecon):
     def getCoilSensitivityMatrix(self):
         # if a coil sensitivity matrix has not yet been set
         if self.CoilSensitivityMatrix.isEmpty():
-            coilsens_set = s=cm.calculate_simple_sense_sensitivitymaps(
+            coilsens_set, mask = s=cm.calculate_simple_sense_sensitivitymaps(
                 self.getPrewhitenedReferenceKSpace(),self.MaskCoilSensitivityMatrix)
+            self.outputMask.set(mask)
             self.setCoilSensitivityMatrix(coilsens_set)
         return self.CoilSensitivityMatrix.get()
 
@@ -614,9 +615,12 @@ class cm2DReconWithSensitivityAutocalibrated(cm2DReconWithSensitivity):
     
     def getCoilSensitivityMatrixReferenceKSpace(self):
         # MASK 
+        
         if self.CoilSensitivityMatrix.isEmpty():       
             s= self.getReferenceKSpace()
-            self.setCoilSensitivityMatrix(cm.prewhiteningSignal(cm.calculate_simple_sense_sensitivitymaps(s,self.MaskCoilSensitivityMatrix), self.getNoiseCovariance() ))
+            sensmap,mask=cm.calculate_simple_sense_sensitivitymaps(s,self.MaskCoilSensitivityMatrix)
+            self.setCoilSensitivityMatrix(cm.prewhiteningSignal(sensmap, self.getNoiseCovariance() ))
+            self.outputMask.set(mask)
         return self.CoilSensitivityMatrix.get()
 
 
