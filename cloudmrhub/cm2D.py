@@ -885,8 +885,8 @@ class cm2DReconGRAPPA(cm2DReconWithSensitivityAutocalibrated):
 
     def getOutput(self):
         grappa_kernel=self.GRAPPAKernel
-        data_acs=self.getPrewhitenedReferenceKSpaceACL()
-        pw_signalrawdata=self.getPrewhitenedSignal(); 
+        data_acs=self.getPrewhitenedReferenceKSpaceACL() #ACLxACxnc
+        pw_signalrawdata=self.getPrewhitenedSignal() #fxpxc
         K=cm.getGRAPPAKspace(pw_signalrawdata,data_acs,grappa_kernel)
         K=self.checkKSpacePixelType(K)
         R=self.reconstructor
@@ -908,8 +908,10 @@ class cm2DSignalToNoiseRatio(cm.cmOutput):
         self.SubType = ""
 
 def resetASPMR(self):
+    """reset the SignalPrewhitened adter the signal is set"""
     self.SignalPrewhitened.reset()
 def resetANPMR(self):
+    """reset the SignalPrewhitened adter the noise is set"""
     if not isinstance(self.NoiseBandWidth,str):
         self.NoiseBandWidth=None
         print('reset the NBW')
@@ -1054,10 +1056,15 @@ class cm2DSignalToNoiseRatioPseudoMultipleReplicas(cm2DSignalToNoiseRatioMultipl
     def __init__(self, x=None, message=None):
         super().__init__(x, message)
         self.numberOfReplicas=20
-        self.D=None
+        self.D=None # denumerator
     def createPseudoReplica(self,S,corr_noise_factor):
         sh=self.reconstructor.getSignalKSpaceSize()
         N= cm.get_pseudo_noise(msize=[*sh, self.reconstructor.getsignalNCoils()],corr_noise_factor=corr_noise_factor)
+        if self.reconstructor.HasAcceleration:
+            ACC=self.reconstructor.Acceleration
+            ACL=self.reconstructor.Autocalibration
+            N,_=cm.mimicAcceleration2D(N,ACC,ACL)
+
         self.add2DKspace(S+N)
     def getSNRDenumerator(self):
         if self.D is None:

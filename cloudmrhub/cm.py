@@ -13,7 +13,8 @@ def getGRAPPAKspace(rawdata, acs, ksize):
     acs: [acl,acl,c]
     ksize: [kx,ky]
     """
-    return pygrappa.cgrappa(rawdata.astype(np.complex128), acs.astype(np.complex128), kernel_size=ksize)
+    O=pygrappa.cgrappa(rawdata.astype(np.complex128), acs.astype(np.complex128), kernel_size=ksize)
+    return O
 
 
 
@@ -51,7 +52,8 @@ class i3d(i2d):
         return self.k.shape[-1]
     
 
-
+import cm2D as cm2d
+import matplotlib.pyplot as plt
 class k2d(i2d):
     """
     A 2d Kspace class to use in CloudMR
@@ -61,6 +63,14 @@ class k2d(i2d):
         super().__init__(k)
     def getNCoils(self):
         return self.k.shape[-1]
+    def plot(self):
+        if not self.isEmpty():
+            R=cm2d.cm2DReconRSS()
+            R.setSignalKSpace(self.k)
+            R.setNoiseCovariance(np.eye(self.getNCoils()))    
+            plt.imshow(np.abs(R.getOutput()))
+            plt.colorbar()
+            plt.show()
     
 class sk2d(i2d):
     """
