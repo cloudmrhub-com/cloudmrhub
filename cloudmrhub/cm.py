@@ -52,7 +52,12 @@ class i3d(i2d):
         return self.k.shape[-1]
     
 
-import cm2D as cm2d
+
+try:
+    import cm2D #dev
+except:
+    import cloudmrhub.cm2D as cm2D #runtime
+    
 import matplotlib.pyplot as plt
 class k2d(i2d):
     """
@@ -65,9 +70,8 @@ class k2d(i2d):
         return self.k.shape[-1]
     def plot(self):
         if not self.isEmpty():
-            R=cm2d.cm2DReconRSS()
-            R.setSignalKSpace(self.k)
-            R.setNoiseCovariance(np.eye(self.getNCoils()))    
+            R=cm2D.cm2DReconRSS()
+            R.setPrewhitenedSignal(self.k)
             plt.imshow(np.abs(R.getOutput()))
             plt.colorbar()
             plt.show()
