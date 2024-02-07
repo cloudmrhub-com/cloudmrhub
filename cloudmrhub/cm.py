@@ -85,20 +85,25 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
         dimension (_type_): kspace dimension 2 or 3 (2d,3D)
     """
         
-    print("calculateCoilsSensitivityMask2D")
+    print("calculateCoilsSensitivityMask2D",end=" ")
     ncoils=K.shape[-1]
     if isinstance(mask,str):
         if mask.lower()=='reference':
-            sensmask = ref_img > np.mean(ref_img)
+            sensmask = np.abs(ref_img) > np.mean(ref_img)-np.std(ref_img)
+            print("reference ")
 
     if isinstance(mask,dict):
             if mask["method"].lower()=='threshold':
                 sensmask = ref_img > mask["value"]
+                print("threshold")
             if mask["method"].lower()=='percentagemean':
                 sensmask = ref_img > (np.mean(ref_img)*mask["value"])
+                print("percentagemean")
             if mask["method"].lower()=='percentage':
                 sensmask = ref_img > (np.max(ref_img)*float(mask["value"])/100.0)
+                print("percentage")
             if mask["method"].lower()=='espirit':
+                print("espirit")
                 k=6
                 r=24
                 t=0.01
@@ -118,17 +123,18 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
                 sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
                 sensmask=np.squeeze(sensmask)
                 sensmask=np.abs(sensmask.sum(axis=-1))>0
-                sensmask=binary_fill_holes(sensmask).astype(np.uint8)
+                sensmask=binary_fill_holes(sensmask)
                 
     if isinstance(mask,np.ndarray):
         sensmask = mask
+        print("mask from ndarray")
     
     if len(sensmask.shape)==2:            
             TILE=[1]*2
             TILE.append(ncoils)
             sensmask = np.tile(np.expand_dims(sensmask,axis=-1), TILE)
 
-    return sensmask
+    return sensmask.astype(np.uint8)
         
 class cmOutput:
     def __init__(self,message=None):
