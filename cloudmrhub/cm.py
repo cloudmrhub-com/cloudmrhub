@@ -72,6 +72,9 @@ class sk2d(i2d):
         return self.k.shape[-1]
     
 from scipy.ndimage import binary_fill_holes
+from scipy.ndimage import label, sum
+from scipy.ndimage.morphology import binary_fill_holes, binary_erosion, binary_dilation
+from scipy.ndimage import generate_binary_structure
 def calculateCoilsSensitivityMask2D(mask,ref_img,K):
     """_summary_
 
@@ -123,12 +126,19 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
                 sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
                 sensmask=np.squeeze(sensmask)
                 sensmask=np.abs(sensmask.sum(axis=-1))>0
-                sensmask=binary_fill_holes(sensmask)
+                
                 
     if isinstance(mask,np.ndarray):
         sensmask = mask
         print("mask from ndarray")
     
+    sensmask=binary_fill_holes(sensmask)
+    struct = generate_binary_structure(2, 2)  # Generate a 5x5 structuring element
+    image_dilated = binary_dilation(sensmask, structure=struct)
+    image_filled = binary_fill_holes(image_dilated)
+    sensmask = binary_erosion(image_filled, structure=struct)
+
+
     if len(sensmask.shape)==2:            
             TILE=[1]*2
             TILE.append(ncoils)
