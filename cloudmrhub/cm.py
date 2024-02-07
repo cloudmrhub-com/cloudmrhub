@@ -118,7 +118,7 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
                 sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
                 sensmask=np.squeeze(sensmask)
                 sensmask=np.abs(sensmask.sum(axis=-1))>0
-                sensmask=binary_fill_holes(sensmask).astype(int)
+                sensmask=binary_fill_holes(sensmask).astype(np.uint8)
                 
     if isinstance(mask,np.ndarray):
         sensmask = mask
