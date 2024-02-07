@@ -18,9 +18,10 @@ def getGRAPPAKspace(rawdata, acs, ksize):
 
 
 
-def getVersionInfo():
-    PKG=['cloudmrhub','pynico_eros_montin','cmrawspy','pygrappa','twixtools','numpy','scipy','matplotlib','pydicom','SimpleITK','PIL','pyable_eros_montin'] 
-    return [{r:pn.getPackageVersion(r)} for r in PKG]
+def getPackagesVersion():
+    PKG=['cloudmrhub','pynico_eros_montin','cmrawspy','pygrappa','twixtools','numpy','scipy','matplotlib','pydicom','SimpleITK','PIL','pyable_eros_montin']
+    
+    return pn.getPackagesVersion(PKG)
 class i2d:
     """
     A 2D image class to use in CloudMR
@@ -69,8 +70,9 @@ class sk2d(i2d):
         super().__init__(k)
     def getnumberOfImages(self):
         return self.k.shape[-1]
-        
-def calculateCoilsSensitivityMask(mask,ref_img,ncoils,dimesion=2):
+    
+from scipy.ndimage import binary_fill_holes
+def calculateCoilsSensitivityMask2D(mask,ref_img,K):
     """_summary_
 
     Args:
@@ -83,10 +85,12 @@ def calculateCoilsSensitivityMask(mask,ref_img,ncoils,dimesion=2):
         dimension (_type_): kspace dimension 2 or 3 (2d,3D)
     """
         
-
+    print("calculateCoilsSensitivityMask2D")
+    ncoils=K.shape[-1]
     if isinstance(mask,str):
         if mask.lower()=='reference':
             sensmask = ref_img > np.mean(ref_img)
+
     if isinstance(mask,dict):
             if mask["method"].lower()=='threshold':
                 sensmask = ref_img > mask["value"]
@@ -94,12 +98,32 @@ def calculateCoilsSensitivityMask(mask,ref_img,ncoils,dimesion=2):
                 sensmask = ref_img > (np.mean(ref_img)*mask["value"])
             if mask["method"].lower()=='percentage':
                 sensmask = ref_img > (np.max(ref_img)*float(mask["value"])/100.0)
-            
+            if mask["method"].lower()=='espirit':
+                k=6
+                r=24
+                t=0.01
+                c=0.9925
+                debug=False
+                for ke,v in mask.items():
+                    if ke.lower()=='k':
+                        k=v
+                    if ke.lower()=='r':
+                        r=v
+                    if ke.lower()=='t':
+                        t=v
+                    if ke.lower()=='c':
+                        c=v
+                    if ke.lower()=='debug':
+                        debug=v
+                sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
+                sensmask=np.squeeze(sensmask)
+                sensmask=np.abs(sensmask.sum(axis=-1))>0
+                sensmask=binary_fill_holes(sensmask)
     if isinstance(mask,np.ndarray):
         sensmask = mask
     
-    if len(sensmask.shape)==dimesion:            
-            TILE=[1]*dimesion
+    if len(sensmask.shape)==2:            
+            TILE=[1]*2
             TILE.append(ncoils)
             sensmask = np.tile(np.expand_dims(sensmask,axis=-1), TILE)
 
@@ -329,7 +353,7 @@ def MRfft(k,dim):
     output = np.fft.ifftshift(tmp)
     return output
 
-def calculate_simple_sense_sensitivitymaps(K,mask=None):
+def calculate_simple_sense_sensitivitymaps2D(K,mask=None):
     """Calculates the coil sensitivity maps using the simple SENSE method.
 
     Args:
@@ -345,7 +369,7 @@ def calculate_simple_sense_sensitivitymaps(K,mask=None):
     sensmask=None
     if (mask is not False) and (mask is not None):
         D=len(K.shape)-1
-        sensmask = calculateCoilsSensitivityMask(mask,ref_img,K.shape[-1],dimesion=D)
+        sensmask = calculateCoilsSensitivityMask2D(mask,ref_img,K)
         coilsens_set = coilsens_set * sensmask
     return coilsens_set, sensmask
 

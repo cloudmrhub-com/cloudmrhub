@@ -10,7 +10,7 @@ include = ["**/*.py"]
 
 [project]
 name = "cloudmrhub"
-version = "1.0.3.4"
+version = "1.0.3.5"
 changes= "CHANGES.md"
 authors = [
   { name="Dr. Eros Montin, PhD", email="eros.montin@gmail.com" },

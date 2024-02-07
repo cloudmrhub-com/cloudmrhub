@@ -1,3 +1,3 @@
 import cm
 
-print(cm.getVersionInfo())
+print(cm.getPackagesVersion())
