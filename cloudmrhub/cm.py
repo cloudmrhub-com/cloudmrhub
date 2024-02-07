@@ -87,12 +87,12 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
         ref_img (_type_): _description_
         dimension (_type_): kspace dimension 2 or 3 (2d,3D)
     """
-        
+    ref_img = np.abs(ref_img)
     print("calculateCoilsSensitivityMask2D",end=" ")
     ncoils=K.shape[-1]
     if isinstance(mask,str):
         if mask.lower()=='reference':
-            sensmask = np.abs(ref_img) > np.mean(ref_img)-np.std(ref_img)
+            sensmask = ref_img > np.mean(ref_img)-np.std(ref_img)
             print("reference ")
 
     if isinstance(mask,dict):
