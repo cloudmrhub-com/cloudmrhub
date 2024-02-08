@@ -92,7 +92,7 @@ class cm2DRecon(cm.cmOutput):
             NoiseKspace: nd.array(f,p,c)
         """
         return self.SignalKSpace.getSize()
-    def getsignalNCoils(self):
+    def getSignalNCoils(self):
         """
         Gets the number of coils in the signal k-space data.
         
@@ -149,7 +149,7 @@ class cm2DRecon(cm.cmOutput):
         """when prewhitened the correlation is an eye
 
         """
-        return np.eye(self.getsignalNCoils())
+        return np.eye(self.getSignalNCoils())
     def setNoiseCovariance(self, noiseCovariance):
         """
         Sets the noise covariance matrix.
@@ -589,7 +589,17 @@ class cm2DReconWithSensitivityAutocalibrated(cm2DReconWithSensitivity):
             if np.isnan(a):
                 self.Autocalibration[i]=s[i]
 
+    def getAccelerationPattern2D(self):
+        ACC=self.Acceleration
+        ACL=self.Autocalibration
+        S=self.getSignalKSpaceSize()
+        nc=self.getSignalNCoils()
+        O,_=cm.mimicAcceleration2D(np.ones((*S,nc)),ACC,ACL)
+        return  O
     
+    def applyAccelerationPattern2D(self,K):
+        P,_ = self.getAccelerationPattern2D()
+        return K*P
     def setAcceleration(self,ACL):
         # if acceleration is a tuple or list
         if isinstance(ACL, (list, tuple)):
@@ -682,7 +692,7 @@ class cm2DReconSENSE(cm2DReconWithSensitivityAutocalibrated):
             R1=1
             R2=self.Acceleration       
         Rtot = R1 * R2
-        nc=self.getsignalNCoils()
+        nc=self.getSignalNCoils()
         #preapre the matrix size
         nf,nph = self.getSignalKSpaceSize()
         # ideally after prewhiteninig the noise covariance matrix should be the identity    
@@ -731,7 +741,7 @@ class cm2DKellmanSENSE(cm2DReconSENSE):
             R1=1
             R2=self.Acceleration
         Rtot = R1 * R2
-        nc=self.getsignalNCoils()
+        nc=self.getSignalNCoils()
         nf,nph = self.getSignalKSpaceSize()
         invRn=self.getInverseNoiseCovariancePrewhitened()
         pw_signalrawdata=self.getPrewhitenedSignal()     
@@ -791,7 +801,7 @@ class cm2DGFactorSENSE(cm2DReconSENSE):
         else:
             R1=1
             R2=self.Acceleration   
-        nc=self.getsignalNCoils()
+        nc=self.getSignalNCoils()
         nf,nph = self.getSignalKSpaceSize()
         invRn=self.getInverseNoiseCovariancePrewhitened()
         pw_sensmap=self.getCoilSensitivityMatrix()
@@ -1057,14 +1067,14 @@ class cm2DSignalToNoiseRatioPseudoMultipleReplicas(cm2DSignalToNoiseRatioMultipl
         super().__init__(x, message)
         self.numberOfReplicas=20
         self.D=None # denumerator
-    def createPseudoReplica(self,S,corr_noise_factor):
+    def createPseudoReplica(self,S,corr_noise_factor,acceleration_pattern=None):
         sh=self.reconstructor.getSignalKSpaceSize()
-        N= cm.get_pseudo_noise(msize=[*sh, self.reconstructor.getsignalNCoils()],corr_noise_factor=corr_noise_factor)
+        N= cm.get_pseudo_noise(msize=[*sh, self.reconstructor.getSignalNCoils()],corr_noise_factor=corr_noise_factor)
         if self.reconstructor.HasAcceleration:
-            ACC=self.reconstructor.Acceleration
-            ACL=self.reconstructor.Autocalibration
-            N,_=cm.mimicAcceleration2D(N,ACC,ACL)
-
+            if acceleration_pattern is None:
+                N=self.reconstructor.applyAccelerationPattern2D(N)
+            else:
+                N=N*acceleration_pattern
         self.add2DKspace(S+N)
     def getSNRDenumerator(self):
         if self.D is None:
@@ -1081,10 +1091,12 @@ class cm2DSignalToNoiseRatioPseudoMultipleReplicas(cm2DSignalToNoiseRatioMultipl
         # self.setReferenceImage(self.reconstructor.getOutput())
         corr_noise_factor=cm.get_correlation_factor(correlation_matrix=self.reconstructor.getNoiseCovariance())
         S=self.reconstructor.getSignalKSpace()
-
+        acceleration_pattern=None
+        if self.reconstructor.HasAcceleration:
+            acceleration_pattern=self.reconstructor.getAccelerationPattern2D()
         for a in range(self.numberOfReplicas):
             #add in the queue
-            self.createPseudoReplica(S,corr_noise_factor)
+            self.createPseudoReplica(S,corr_noise_factor,acceleration_pattern=acceleration_pattern)
         if self.referenceImage.isEmpty():
             self.setReferenceImage(self.reconstructor.getOutput())
         D=self.getSNRDenumerator()

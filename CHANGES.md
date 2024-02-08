@@ -1,4 +1,6 @@
-# version:1.0.4.011
+# version:1.0.4.2
+optimizing the grappa PMR fix
+# version:1.0.4.1
 grappa PMR fixed
 # version:1.0.3.11
 no mask to i2d
