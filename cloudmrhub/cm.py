@@ -108,6 +108,16 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
         if mask.lower()=='reference':
             sensmask = ref_img > np.mean(ref_img)-np.std(ref_img)
             print("reference ")
+        if mask.lower()=='espirit':
+            print("espirit")
+            k=8
+            r=24
+            t=0.01
+            c=0.9925
+            debug=False
+            sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
+            sensmask=np.squeeze(sensmask)
+            sensmask=np.abs(sensmask.sum(axis=-1))>0
 
     if isinstance(mask,dict):
             if mask["method"].lower()=='threshold':
@@ -119,6 +129,9 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
             if mask["method"].lower()=='percentage':
                 sensmask = ref_img > (np.max(ref_img)*float(mask["value"])/100.0)
                 print("percentage")
+            if mask["method"].lower()=='reference':
+                sensmask = ref_img > np.mean(ref_img)-np.std(ref_img)
+                print("reference ")
             if mask["method"].lower()=='espirit':
                 print("espirit")
                 k=6
