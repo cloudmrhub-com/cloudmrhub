@@ -1,3 +1,9 @@
+# version:1.0.4.4
+no sensmask
+{"method":"no"}
+# version:1.0.4.3
+sensmask upload
+{"method":"upload","file","filename"}
 # version:1.0.4.2
 optimizing the grappa PMR fix
 # version:1.0.4.1

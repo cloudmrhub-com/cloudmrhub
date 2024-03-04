@@ -102,12 +102,15 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
         dimension (_type_): kspace dimension 2 or 3 (2d,3D)
     """
     ref_img = np.abs(ref_img)
+    sensmask = np.ones((ref_img.shape[0],ref_img.shape[1]))
     print("calculateCoilsSensitivityMask2D",end=" ")
     ncoils=K.shape[-1]
+    FILLHOLES=False
     if isinstance(mask,str):
         if mask.lower()=='reference':
             sensmask = ref_img > np.mean(ref_img)-np.std(ref_img)
             print("reference ")
+            FILLHOLES=True
         if mask.lower()=='espirit':
             print("espirit")
             k=8
@@ -118,20 +121,33 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
             sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
             sensmask=np.squeeze(sensmask)
             sensmask=np.abs(sensmask.sum(axis=-1))>0
-
+            FILLHOLES=True
     if isinstance(mask,dict):
             if mask["method"].lower()=='threshold':
                 sensmask = ref_img > mask["value"]
                 print("threshold")
+                FILLHOLES=True
             if mask["method"].lower()=='percentagemean':
                 sensmask = ref_img > (np.mean(ref_img)*mask["value"])
                 print("percentagemean")
+                FILLHOLES=True
             if mask["method"].lower()=='percentage':
                 sensmask = ref_img > (np.max(ref_img)*float(mask["value"])/100.0)
                 print("percentage")
+                FILLHOLES=True
             if mask["method"].lower()=='reference':
                 sensmask = ref_img > np.mean(ref_img)-np.std(ref_img)
                 print("reference ")
+                FILLHOLES=True
+            if mask["method"].lower()=='upload':
+                read=ima.Imaginable()
+                read.readImage(mask["file"])
+                sensmask = read.getImageAsNumpy()
+                sensmask = sensmask > 0
+                FILLHOLES=False
+            if (mask["method"].lower()=='no') or (mask["method"].lower()=='zero'):
+                sensmask = np.ones((ref_img.shape[0],ref_img.shape[1]))
+                FILLHOLES=False
             if mask["method"].lower()=='espirit':
                 print("espirit")
                 k=6
@@ -153,18 +169,21 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
                 sensmask = sensitivitiesEspirit2D(K, k, r,t,c,debug)       
                 sensmask=np.squeeze(sensmask)
                 sensmask=np.abs(sensmask.sum(axis=-1))>0
-                
+                FILLHOLES=True
                 
     if isinstance(mask,np.ndarray):
         sensmask = mask
         print("mask from ndarray")
-    
-    sensmask=binary_fill_holes(sensmask)
-    struct = generate_binary_structure(2, 2)  # Generate a 5x5 structuring element
-    image_dilated = binary_dilation(sensmask, structure=struct)
-    image_filled = binary_fill_holes(image_dilated)
-    sensmask = binary_erosion(image_filled, structure=struct)
-
+    #if sensmask doesn't exists
+    if not 'sensmask' in locals():
+        sensmask = np.ones((ref_img.shape[0],ref_img.shape[1]))
+        print("default")
+    if FILLHOLES:
+        sensmask=binary_fill_holes(sensmask)
+        struct = generate_binary_structure(2, 2)  # Generate a 5x5 structuring element
+        image_dilated = binary_dilation(sensmask, structure=struct)
+        image_filled = binary_fill_holes(image_dilated)
+        sensmask = binary_erosion(image_filled, structure=struct)
 
     if len(sensmask.shape)==2:            
             TILE=[1]*2
@@ -412,6 +431,7 @@ def calculate_simple_sense_sensitivitymaps2D(K,mask=None):
     coilsens_set = sensmap_temp / np.tile(np.expand_dims(ref_img,axis=-1), [1, 1, dims[2]])
     sensmask=np.array([])
     if (mask is not False) and (mask is not None):
+        print('masking')
         D=len(K.shape)-1
         sensmask = calculateCoilsSensitivityMask2D(mask,ref_img,K)
         coilsens_set = coilsens_set * sensmask

@@ -370,7 +370,11 @@ class cm2DReconWithSensitivity(cm2DRecon):
         self.outputMask=cm.k2d()
 
     def setNoMask(self):
-        self.setMaskCoilSensitivityMatrix(False)
+        # self.setMaskCoilSensitivityMatrix(False)
+        O={"method":"no"}
+        self.setMaskCoilSensitivityMatrix(O)
+        
+        
 
     def setMaskCoilSensitivityMatrixBasedOnEspirit(self,k=8,r=24,t=0.01,c=0.997):
         O={"method":"espirit","k":k,"r":r,"t":t,"c":c}
