@@ -140,8 +140,7 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
                 print("reference ")
                 FILLHOLES=True
             if mask["method"].lower()=='upload':
-                read=ima.Imaginable()
-                read.readImage(mask["file"])
+                read=ima.Imaginable(mask["file"])
                 sensmask = read.getImageAsNumpy()
                 sensmask = sensmask > 0
                 FILLHOLES=False
