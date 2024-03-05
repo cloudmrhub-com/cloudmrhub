@@ -106,7 +106,7 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
     print("calculateCoilsSensitivityMask2D",end=" ")
     ncoils=K.shape[-1]
     FILLHOLES=False
-    if isinstance(mask,str):
+    if isinstance(mask,str):  #will be removed
         if mask.lower()=='reference':
             sensmask = ref_img > np.mean(ref_img)-np.std(ref_img)
             print("reference ")
@@ -169,8 +169,11 @@ def calculateCoilsSensitivityMask2D(mask,ref_img,K):
                 sensmask=np.squeeze(sensmask)
                 sensmask=np.abs(sensmask.sum(axis=-1))>0
                 FILLHOLES=True
+            if mask["method"].lower()=='numpy':
+                sensmask = mask["matrix"]
+                FILLHOLES=False
                 
-    if isinstance(mask,np.ndarray):
+    if isinstance(mask,np.ndarray): #will be removed
         sensmask = mask
         print("mask from ndarray")
     #if sensmask doesn't exists
@@ -429,11 +432,16 @@ def calculate_simple_sense_sensitivitymaps2D(K,mask=None):
     ref_img = np.sqrt(np.sum(np.abs(sensmap_temp)**2, axis=-1))
     coilsens_set = sensmap_temp / np.tile(np.expand_dims(ref_img,axis=-1), [1, 1, dims[2]])
     sensmask=np.array([])
-    if (mask is not False) and (mask is not None):
-        print('masking')
-        D=len(K.shape)-1
-        sensmask = calculateCoilsSensitivityMask2D(mask,ref_img,K)
-        coilsens_set = coilsens_set * sensmask
+    if isinstance(mask,np.ndarray):
+        c=mask
+        mask={"matrix":c, "method":"numpy"}
+        
+    if (mask is False) or (mask is None):
+        mask={"method":"no","value":0}
+        
+    D=len(K.shape)-1
+    sensmask = calculateCoilsSensitivityMask2D(mask,ref_img,K)
+    coilsens_set = coilsens_set * sensmask
     return coilsens_set, sensmask
 
 def get_wien_noise_image(noiseonly, box):
